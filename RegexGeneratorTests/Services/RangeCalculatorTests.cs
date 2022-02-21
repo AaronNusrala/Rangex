@@ -7,7 +7,8 @@ using RegexGenerator.Services;
 
 namespace RegexGeneratorTests.Services
 {
-    public class Tests
+    [TestFixture]
+    public class RangeCalculatorTests
     {
         private RangeCalculator _rangeCalculator;
 

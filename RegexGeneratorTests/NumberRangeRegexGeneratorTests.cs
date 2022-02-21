@@ -4,7 +4,8 @@ using RegexGenerator.Services;
 
 namespace RegexGeneratorTests
 {
-    internal class NumberRangeRegexGeneratorTests
+    [TestFixture]
+    public class NumberRangeRegexGeneratorTests
     {
         private NumberRangeRegexGenerator _regexGenerator;
 
