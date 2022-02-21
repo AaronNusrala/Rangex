@@ -1,8 +1,13 @@
 ﻿using RegexGenerator.Models;
 
-namespace RegexGenerator;
+namespace RegexGenerator.Services;
 
-internal class RangeCalculator
+internal interface IRangeCalculator
+{
+    IEnumerable<RegexRange> CalculateRanges(int min, int max);
+}
+
+internal class RangeCalculator : IRangeCalculator
 {
     public IEnumerable<RegexRange> CalculateRanges(int min, int max)
     {

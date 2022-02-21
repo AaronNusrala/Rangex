@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
-using RegexGenerator;
 using RegexGenerator.Models;
+using RegexGenerator.Services;
 
-namespace RegexGeneratorTests
+namespace RegexGeneratorTests.Services
 {
     public class Tests
     {
@@ -56,9 +56,9 @@ namespace RegexGeneratorTests
             sb.AppendLine();
             sb.Append("Got:      ");
 
-            foreach (var actualRange in actualRanges.OrderBy(r => r.Min))
+            foreach (var (actualMin, actualMax) in actualRanges.OrderBy(r => r.Min))
             {
-                sb.Append("(").Append(actualRange.Min).Append(", ").Append(actualRange.Max).Append(") ");
+                sb.Append("(").Append(actualMin).Append(", ").Append(actualMax).Append(") ");
 
             }
 
