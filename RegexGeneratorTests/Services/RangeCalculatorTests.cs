@@ -60,7 +60,6 @@ namespace RegexGeneratorTests.Services
             foreach (var (actualMin, actualMax) in actualRanges.OrderBy(r => r.Min))
             {
                 sb.Append("(").Append(actualMin).Append(", ").Append(actualMax).Append(") ");
-
             }
 
             return sb.ToString();
@@ -74,7 +73,8 @@ namespace RegexGeneratorTests.Services
             new object[] { 1, 2, new []{ (1, 2) } },
             new object[] { 1, 10, new []{ (1, 9), (10, 10) } },
             new object[] { 1, 100, new []{ (1, 9), (10, 99), (100, 100) } },
-            new object[] { 1, 101, new []{ (1, 9), (10, 99), (100, 101) } }
+            new object[] { 1, 101, new []{ (1, 9), (10, 99), (100, 101) } },
+            new object[] { 3, 4382, new []{ (3, 9), (10, 99), (100, 999), (1000, 3999), (4000, 4299), (4300, 4379), (4380, 4382) } }
         };
     }
 }

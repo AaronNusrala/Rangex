@@ -12,11 +12,11 @@ internal class RangeCalculator : IRangeCalculator
     public IEnumerable<RegexRange> CalculateRanges(int min, int max)
     {
         for (var i = 0; min <= max; i++)
-        {
+        { 
             var bottomRange = SplitLower(i, min);
             var topRange = SplitUpper(i, max);
 
-            if (bottomRange?.Max > topRange?.Min)
+            if (bottomRange?.Max >= topRange?.Min)
             {
                 yield return new RegexRange
                 {
@@ -79,7 +79,7 @@ internal class RangeCalculator : IRangeCalculator
 
     private static string ReplaceEnd(string value, char replacementValue, int index)
     {
-        var valueCharacters = value.Substring(0, value.Length - 1 - index);
+        var valueCharacters = value[..(value.Length - 1 - index)];
         var replacementCharacters = new string(replacementValue, index + 1);
         return valueCharacters + replacementCharacters;
     }
