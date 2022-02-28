@@ -9,7 +9,6 @@ namespace RegexGenerator.Services
     }
 
     internal class DecimalRangeCalculator : IDecimalRangeCalculator
-
     {
         public IEnumerable<DecimalRegexRange> GetRanges(Decimal min, Decimal max)
         {
@@ -19,80 +18,107 @@ namespace RegexGenerator.Services
                 Min = max
             };
 
+
             max = new Decimal
             {
-                LeadingZeros = max.LeadingZeros,
-                Value = max.Value - 1 // this does not handle all cases (.01 -> .009)
+                LeadingZeros = max.Value switch
+                {
+                    0 => 0,
+                    1 => max.LeadingZeros + 1,
+                    _ => max.LeadingZeros,
+                },
+                Value = max.Value switch
+                {
+                    0 => 0,
+                    1 => 9,
+                    _ => max.Value - 1
+                }
             };
 
-            DecimalRegexRange topRange = null;
 
-            for (var i = 0; ; i++)
+            while(true)
             {
+                var topRange = SplitTop(max);
                 var bottomRange = SplitBottom(min);
 
-                if (topRange == null || topRange.Min.Value > 0)
+                //this doesn't guarantee that these intersect on the same iteration.  Need to find a way to check in case top 
+                //and bottom intersect on different iterations. Will run forever if intersection isn't found, even if there
+                //was an intersection on previous iterations.
+                if (bottomRange.Max.LeadingZeros == topRange.Min.LeadingZeros)
                 {
-                    topRange = SplitTop(max);
-                }
+                    var b = bottomRange.Max.Value;
+                    var t = topRange.Min.Value;
+                    var bm = Magnitude(bottomRange.Max.Value);
+                    var tm = Magnitude(topRange.Min.Value);
 
-                if (bottomRange.Max.LeadingZeros == topRange.Min.LeadingZeros && bottomRange.Max.Value >= topRange.Min.Value)
-                {
-                    yield return new DecimalRegexRange
+                    if (bm < tm)
                     {
-                        Min = new Decimal
-                        {
-                            LeadingZeros = bottomRange.Min.LeadingZeros,
-                            Value = bottomRange.Min.Value
-                        },
-                        Max = new Decimal
-                        {
-                            LeadingZeros = topRange.Max.LeadingZeros,
-                            Value = topRange.Max.Value
-                        }
-                    };
+                        b *= (int)Math.Pow(10, tm - bm);
+                    }
+                    
+                    if (bm > tm)
+                    {
+                        t *= (int)Math.Pow(10, bm - tm);
+                    }
 
-                    yield break;
+                    if (b > t)
+                    {
+                        yield return new DecimalRegexRange
+                        {
+                            Min = bottomRange.Min,
+                            Max = topRange.Max
+                        };
+
+                        break;
+                    }
+
+                    if (b == t)
+                    {
+                        yield return new DecimalRegexRange
+                        {
+                            Min = bottomRange.Min,
+                            Max = new Decimal
+                            {
+                                LeadingZeros = bottomRange.Max.LeadingZeros,
+                                Value = bottomRange.Max.Value - 1
+                            }
+                        };
+
+                        yield return topRange;
+                        yield break;
+                    }
                 }
 
+                yield return topRange;
                 yield return bottomRange;
-
-                if (topRange.Min.Value > 0)
-                {
-                    yield return topRange;
-                }
-
-                var newMaxValue = topRange.Min.Value - 1;
-
-                max = new Decimal
-                {
-                    LeadingZeros = topRange.Max.LeadingZeros,
-                    Value = 
-                };
-
-                var newMinValue = bottomRange.Min.Value + 1;
-                var isPowerOfBase = IsPowerOfBase(10, newMinValue);
 
                 min = new Decimal
                 {
-                    LeadingZeros = isPowerOfBase ? bottomRange.Min.LeadingZeros - 1 : bottomRange.Min.LeadingZeros,
-                    Value = isPowerOfBase ? 1 : newMinValue
+                    LeadingZeros = bottomRange.Max.LeadingZeros == 0 ? 0 : bottomRange.Max.Value == 9 ? bottomRange.Max.LeadingZeros - 1 : bottomRange.Max.LeadingZeros,
+                    Value = bottomRange.Max.Value == 9 ? 1 : (bottomRange.Max.Value + 1) / 10
+                };
+
+                max = new Decimal
+                {
+                    LeadingZeros = topRange.Min.LeadingZeros,
+                    Value = topRange.Min.Value == 0 ? 0 : topRange.Min.Value / 10 - 1
                 };
             }
         }
 
-        private static bool IsPowerOfBase(int b, int v)
+        private static int Magnitude(int value)
         {
-            for (var i = b; i <= v; i *= b)
+            var i = 0;
+
+            while(value > 0)
             {
-                if (i == v)
-                {
-                    return true;
-                }
+                value /= 10;
+                i++;
             }
 
-            return false;
+            return i;
         }
+
 
         private static DecimalRegexRange SplitBottom(Decimal min)
         {
@@ -113,7 +139,7 @@ namespace RegexGenerator.Services
         {
             var min = new Decimal
             {
-                Value = max.Value / 10,
+                Value = max.Value - max.Value % 10,
                 LeadingZeros = max.LeadingZeros
             };
 

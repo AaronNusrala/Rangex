@@ -22,20 +22,19 @@ namespace RegexGeneratorTests.Services
         {
             var min = new Decimal
             {
-                Value = 28,
-                LeadingZeros = 4
+                Value = 1,
+                LeadingZeros = 2
             };
 
             var max = new Decimal
             {
-                LeadingZeros = 0,
-                Value = 738
+                Value = 998,
+                LeadingZeros = 2
             };
 
             var test = _rangeCalculator
                 .GetRanges(min, max)
-                .OrderByDescending(r => r.Min.LeadingZeros)
-                .ThenBy(r => r.Min.Value);
+                .OrderBy(r => decimal.Parse(r.Min.ToString()));
 
             foreach (var range in test)
             {
