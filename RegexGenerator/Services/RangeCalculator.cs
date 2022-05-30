@@ -45,17 +45,17 @@ internal class RangeCalculator : IRangeCalculator
     {
         var minStr = min.ToString();
 
+        var pow = Math.Pow(10, index);
+
         if (min != 0 && minStr[minStr.Length - 1 - index] == '0')
         {
             return null;
         }
-
-        var rangeTopString = ReplaceEnd(minStr, '9', index);
-
+        
         return new RegexRange
         {
             Min = min,
-            Max = int.Parse(rangeTopString)
+            Max = Compliment(min, index)
         };
     }
 
@@ -82,5 +82,11 @@ internal class RangeCalculator : IRangeCalculator
         var valueCharacters = value[..(value.Length - 1 - index)];
         var replacementCharacters = new string(replacementValue, index + 1);
         return valueCharacters + replacementCharacters;
+    }
+
+    private static int Compliment(int value, int index)
+    {
+        var t = (int)Math.Pow(10, index + 1);
+        return value + t - 1 - value % t;
     }
 }
