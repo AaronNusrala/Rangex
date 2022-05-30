@@ -28,7 +28,7 @@ namespace RegexGeneratorTests.Services
 
             var max = new Decimal
             {
-                Value = 998,
+                Value = 99,
                 LeadingZeros = 2
             };
 
