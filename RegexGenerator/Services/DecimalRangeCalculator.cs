@@ -18,14 +18,13 @@ namespace RegexGenerator.Services
                 Min = max
             };
 
-
             max = new Decimal
             {
                 LeadingZeros = max.Value switch
                 {
                     0 => 0,
                     1 => max.LeadingZeros + 1,
-                    _ => max.LeadingZeros,
+                    _ => max.LeadingZeros
                 },
                 Value = max.Value switch
                 {
@@ -34,7 +33,6 @@ namespace RegexGenerator.Services
                     _ => max.Value - 1
                 }
             };
-
 
             while(true)
             {
@@ -72,7 +70,7 @@ namespace RegexGenerator.Services
                         break;
                     }
 
-                    if (b == t)
+                    if (b == t && bottomRange.Max.Value != topRange.Min.Value)
                     {
                         yield return new DecimalRegexRange
                         {
