@@ -33,37 +33,37 @@ namespace RegexGenerator.Services
 
         public IRegexBuilder BeginString()
         {
-            _stringBuilder.Append("^");
+            _stringBuilder.Append('^');
             return this;
         }
 
         public IRegexBuilder EndString()
         {
-            _stringBuilder.Append("$");
+            _stringBuilder.Append('$');
             return this;
         }
 
         public IRegexBuilder Group()
         {
-            _stringBuilder.Append("(");
+            _stringBuilder.Append('(');
             return this;
         }
 
         public IRegexBuilder EndGroup()
         {
-            _stringBuilder.Append(")");
+            _stringBuilder.Append(')');
             return this;
         }
 
         public IRegexBuilder CharacterClassRange(char min, char max)
         {
-            _stringBuilder.Append("[").Append(min).Append("-").Append(max).Append("]");
+            _stringBuilder.Append('[').Append(min).Append('-').Append(max).Append(']');
             return this;
         }
 
         public IRegexBuilder Or()
         {
-            _stringBuilder.Append("|");
+            _stringBuilder.Append('|');
             return this;
         } 
 

@@ -44,9 +44,7 @@ internal class RangeCalculator : IRangeCalculator
     private static RegexRange? SplitLower(int index, int min)
     {
         var minStr = min.ToString();
-
-        var pow = Math.Pow(10, index);
-
+        
         if (min != 0 && minStr[minStr.Length - 1 - index] == '0')
         {
             return null;
@@ -55,7 +53,7 @@ internal class RangeCalculator : IRangeCalculator
         return new RegexRange
         {
             Min = min,
-            Max = Compliment(min, index)
+            Max = Nines(min, index)
         };
     }
 
@@ -67,12 +65,10 @@ internal class RangeCalculator : IRangeCalculator
         {
             return null;
         }
-
-        var rangeBottomString = ReplaceEnd(maxStr, '0', index);
-
+        
         return new RegexRange
         {
-            Min = int.Parse(rangeBottomString),
+            Min = Zeros(max, index),
             Max = max
         };
     }
@@ -84,9 +80,17 @@ internal class RangeCalculator : IRangeCalculator
         return valueCharacters + replacementCharacters;
     }
 
-    private static int Compliment(int value, int index)
+    //Nines(111, 1) -> 199
+    private static int Nines(int value, int index)
     {
         var t = (int)Math.Pow(10, index + 1);
-        return value + t - 1 - value % t;
+        return value - value % t + t  - 1;
+    }
+
+    //Zeros(111, 1) -> 100
+    private static int Zeros(int value, int index)
+    {
+        var t = (int)Math.Pow(10, index + 1);
+        return value - value % t;
     }
 }

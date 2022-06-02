@@ -12,140 +12,130 @@ namespace RegexGenerator.Services
     {
         public IEnumerable<DecimalRegexRange> GetRanges(Decimal min, Decimal max)
         {
-            yield return new DecimalRegexRange
-            {
-                Max = max,
-                Min = max
-            };
+            var lowerRanges = new List<DecimalRegexRange>();
+            var upperRanges = new List<DecimalRegexRange>();
+            
+            var upperRange = new DecimalRegexRange(max, max);
+            
+            var newMinValue = TrimTrailingZeros(min.Value);
+            min = new Decimal(newMinValue, min.LeadingZeros);
 
-            max = new Decimal
+            var newMaxValue = TrimTrailingZeros(max.Value);
+            max = new Decimal(newMaxValue, max.LeadingZeros);
+            
+            if (min.LeadingZeros == max.LeadingZeros && min.Value == max.Value)
             {
-                LeadingZeros = max.Value switch
+                return new[] { upperRange };
+            }
+
+            upperRanges.Add(upperRange);
+            var lowerRange = CompleteRangeFromMin(min);
+
+            var intersection = GetIntersection(lowerRange, upperRange);
+
+            if (intersection != null)
+            {
+                return new []{intersection, upperRange};
+            }
+
+            lowerRanges.Add(lowerRange);
+
+            while (true)
+            {
+                var upperSplit = SplitUpperRange(lowerRange, upperRange);
+                
+                if (upperSplit)
                 {
-                    0 => 0,
-                    1 => max.LeadingZeros + 1,
-                    _ => max.LeadingZeros
-                },
-                Value = max.Value switch
-                {
-                    0 => 0,
-                    1 => 9,
-                    _ => max.Value - 1
+                    upperRange = GetNextLowerRange(upperRange.Min);
                 }
-            };
-
-            while(true)
-            {
-                var topRange = SplitTop(max);
-                var bottomRange = SplitBottom(min);
-
-                //this doesn't guarantee that these intersect on the same iteration.  Need to find a way to check in case top 
-                //and bottom intersect on different iterations. Will run forever if intersection isn't found, even if there
-                //was an intersection on previous iterations.
-                if (bottomRange.Max.LeadingZeros == topRange.Min.LeadingZeros)
+                else
                 {
-                    var b = bottomRange.Max.Value;
-                    var t = topRange.Min.Value;
-                    var bm = Magnitude(bottomRange.Max.Value);
-                    var tm = Magnitude(topRange.Min.Value);
-
-                    if (bm < tm)
-                    {
-                        b *= (int)Math.Pow(10, tm - bm);
-                    }
-                    
-                    if (bm > tm)
-                    {
-                        t *= (int)Math.Pow(10, bm - tm);
-                    }
-
-                    if (b > t)
-                    {
-                        yield return new DecimalRegexRange
-                        {
-                            Min = bottomRange.Min,
-                            Max = topRange.Max
-                        };
-
-                        break;
-                    }
-
-                    if (b == t && bottomRange.Max.Value != topRange.Min.Value)
-                    {
-                        yield return new DecimalRegexRange
-                        {
-                            Min = bottomRange.Min,
-                            Max = new Decimal
-                            {
-                                LeadingZeros = bottomRange.Max.LeadingZeros,
-                                Value = bottomRange.Max.Value - 1
-                            }
-                        };
-
-                        yield return topRange;
-                        yield break;
-                    }
+                    lowerRange = GetNextHigherRange(lowerRange.Max);
                 }
 
-                yield return topRange;
-                yield return bottomRange;
+                intersection = GetIntersection(lowerRange, upperRange);
 
-                min = new Decimal
+                if (intersection != null)
                 {
-                    LeadingZeros = bottomRange.Max.LeadingZeros == 0 ? 0 : bottomRange.Max.Value == 9 ? bottomRange.Max.LeadingZeros - 1 : bottomRange.Max.LeadingZeros,
-                    Value = bottomRange.Max.Value == 9 ? 1 : (bottomRange.Max.Value + 1) / 10
-                };
-
-                max = new Decimal
+                    return lowerRanges
+                        .Append(intersection)
+                        .Concat(upperRanges)
+                        .Except(new []{lowerRange, upperRange});
+                }
+                
+                if (upperSplit)
                 {
-                    LeadingZeros = topRange.Min.LeadingZeros,
-                    Value = topRange.Min.Value == 0 ? 0 : topRange.Min.Value / 10 - 1
-                };
+                    upperRanges.Insert(0, upperRange);
+                }
+                else
+                {
+                    lowerRanges.Add(lowerRange);
+                }
             }
         }
 
-        private static int Magnitude(int value)
+        private static bool SplitUpperRange(DecimalRegexRange lowerRange, DecimalRegexRange upperRange)
         {
-            var i = 0;
+            if (lowerRange.Max.LeadingZeros == upperRange.Max.LeadingZeros)
+            {
+                return upperRange.Min.Value > lowerRange.Max.Value;
+            }
 
-            while(value > 0)
+            return lowerRange.Max.LeadingZeros < upperRange.Min.LeadingZeros;
+        }
+        
+        private static DecimalRegexRange GetNextLowerRange(Decimal previousMin)
+        {
+            var nextMaxValue = TrimTrailingZeros(previousMin.Value);
+            nextMaxValue--;
+            var nextMax = new Decimal(nextMaxValue, previousMin.LeadingZeros);
+            var newMinValue = nextMax.Value - nextMax.Value % 10;
+            var nextMin = new Decimal(newMinValue, previousMin.LeadingZeros);
+            return new DecimalRegexRange(nextMin, nextMax);
+        }
+
+        private static DecimalRegexRange GetNextHigherRange(Decimal previousMax)
+        {
+            var nextMaxValue = previousMax.Value + 1;
+            nextMaxValue = TrimTrailingZeros(nextMaxValue);
+            var nextMaxLeadingZeros = nextMaxValue == 1 ? previousMax.LeadingZeros - 1 : previousMax.LeadingZeros;
+            var nextMin = new Decimal(nextMaxValue, nextMaxLeadingZeros);
+            return CompleteRangeFromMin(nextMin);
+        }
+
+        private static DecimalRegexRange CompleteRangeFromMin(Decimal min)
+        {
+            var maxValue = min.Value + 9 - min.Value % 10;
+            var max = new Decimal(maxValue, min.LeadingZeros);
+            return new DecimalRegexRange(min, max);
+        }
+
+        /// <summary>
+        /// This only works because we can make some assumptions about regex-able decimal ranges.
+        /// In order for a range to regex-able, we assume the following are true:
+        /// 1. The min and max must always have the same number of leading zeros
+        /// 2. The values must always have the same number of digits.
+        /// </summary>
+        /// <returns>A DecimalRegexRange that represents the intersection of the two range parameters</returns>
+        private static DecimalRegexRange? GetIntersection(DecimalRegexRange r1, DecimalRegexRange r2)
+        {
+            var sameLeadingZeros = r1.Min.LeadingZeros == r2.Min.LeadingZeros;
+            var valuesOverlap = r1.Min.Value <= r2.Max.Value && r2.Min.Value <= r1.Max.Value;
+
+            return sameLeadingZeros && valuesOverlap
+                ? new DecimalRegexRange(r1.Min, r2.Max)
+                : null;
+        }
+
+        //1100 => 11
+        private static int TrimTrailingZeros(int value)
+        {
+            while (value > 0 && value % 10 == 0)
             {
                 value /= 10;
-                i++;
             }
 
-            return i;
-        }
-
-
-        private static DecimalRegexRange SplitBottom(Decimal min)
-        {
-            var max = new Decimal
-            {
-                Value = min.Value + 9 - min.Value % 10,
-                LeadingZeros = min.LeadingZeros
-            };
-
-            return new DecimalRegexRange
-            {
-                Min = min,
-                Max = max
-            };
-        }
-
-        private static DecimalRegexRange SplitTop(Decimal max)
-        {
-            var min = new Decimal
-            {
-                Value = max.Value - max.Value % 10,
-                LeadingZeros = max.LeadingZeros
-            };
-
-            return new DecimalRegexRange
-            {
-                Min = min,
-                Max = max
-            };
+            return value;
         }
     }
 }
