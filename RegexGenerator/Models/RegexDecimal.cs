@@ -1,12 +1,12 @@
 ﻿namespace RegexGenerator.Models
 {
-    internal class Decimal
+    internal sealed class RegexDecimal
     {
         public int Value { get; }
 
         public int LeadingZeros { get; }
 
-        public Decimal(int value, int leadingZeros)
+        public RegexDecimal(int value, int leadingZeros)
         {
             Value = value;
             LeadingZeros = leadingZeros;

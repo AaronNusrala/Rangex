@@ -53,7 +53,7 @@ internal class RangeCalculator : IRangeCalculator
         return new RegexRange
         {
             Min = min,
-            Max = Nines(min, index)
+            Max = min.Nines(index)
         };
     }
 
@@ -68,7 +68,7 @@ internal class RangeCalculator : IRangeCalculator
         
         return new RegexRange
         {
-            Min = Zeros(max, index),
+            Min = max.Zeros(index),
             Max = max
         };
     }
@@ -78,19 +78,5 @@ internal class RangeCalculator : IRangeCalculator
         var valueCharacters = value[..(value.Length - 1 - index)];
         var replacementCharacters = new string(replacementValue, index + 1);
         return valueCharacters + replacementCharacters;
-    }
-
-    //Nines(111, 1) -> 199
-    private static int Nines(int value, int index)
-    {
-        var t = (int)Math.Pow(10, index + 1);
-        return value - value % t + t  - 1;
-    }
-
-    //Zeros(111, 1) -> 100
-    private static int Zeros(int value, int index)
-    {
-        var t = (int)Math.Pow(10, index + 1);
-        return value - value % t;
-    }
+    } 
 }

@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using RegexGenerator.Services;
 
-namespace RegexGeneratorTests.Services
+namespace RegexGeneratorTests.Tests.Services
 {
     [TestFixture]
     public class RegexBuilderTests

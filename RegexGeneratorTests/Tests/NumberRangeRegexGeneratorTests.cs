@@ -2,7 +2,7 @@
 using RegexGenerator;
 using RegexGenerator.Services;
 
-namespace RegexGeneratorTests
+namespace RegexGeneratorTests.Tests
 {
     [TestFixture]
     public class NumberRangeRegexGeneratorTests

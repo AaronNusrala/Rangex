@@ -18,4 +18,13 @@
     <ProjectReference Include="..\RegexGenerator\RegexGenerator.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="TestCases\DecimalRangeCalculatorTests.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestCases\RangeCalculatorTests.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
