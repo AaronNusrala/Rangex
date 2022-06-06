@@ -13,12 +13,12 @@ namespace RegexGenerator.Services
         {
             if (min.Value == 0)
             {
-                min = new RegexDecimal(0, 0);
+                min = RegexDecimal.Zero;
             }
 
             if (max.Value == 0)
             {
-                max = new RegexDecimal(0, 0);
+                max = RegexDecimal.Zero;
             }
             else
             {
@@ -37,9 +37,11 @@ namespace RegexGenerator.Services
             var upperRanges = GetUpperRanges(initialRange.Min);
             var lowerRanges = new List<RegexDecimalRange>();
             var lowerRange = CompleteRangeFromMin(min);
+            var iterations = 0;
 
-            while (true)
+            while (iterations < 10000)
             {
+                iterations++;
                 if (lowerRange.Min.Value.TrimTrailingZeros() == initialRange.Min.Value.TrimTrailingZeros() 
                     && lowerRange.Min.LeadingZeros == initialRange.Min.LeadingZeros)
                 {
@@ -73,6 +75,8 @@ namespace RegexGenerator.Services
                 lowerRanges.Add(lowerRange);
                 lowerRange = GetNextHigherRange(lowerRange.Max);
             }
+
+            throw new Exception($"intersection not found after {iterations} iterations");
         }
 
         private static RegexDecimal NormalizeMagnitude(RegexDecimal min, RegexDecimal max)
@@ -97,12 +101,20 @@ namespace RegexGenerator.Services
         private static List<RegexDecimalRange> GetUpperRanges(RegexDecimal max)
         {
             var upperRanges = new List<RegexDecimalRange>();
+
+            var iterations = 0;
             
-            while (max.Value > 0)
+            while (max.Value > 0 && iterations <= 10000)
             {
                 var upperRange = GetNextLowerRange(max);
                 upperRanges.Insert(0, upperRange);
                 max = upperRange.Min;
+                iterations++;
+            }
+
+            if (iterations == 10000)
+            {
+                throw new Exception("Failed to get next ranges inifinite loop detected");
             }
 
             return upperRanges;

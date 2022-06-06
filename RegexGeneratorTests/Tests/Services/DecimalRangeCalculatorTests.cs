@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using RegexGenerator.Models;
 using RegexGenerator.Services;
@@ -24,7 +25,7 @@ namespace RegexGeneratorTests.Tests.Services
         {
             return TestCaseUtility.GetTestCases<DecimalRangeCalculatorTestCase[]>(nameof(DecimalRangeCalculatorTests));
         }
-        
+
         [Test, TestCaseSource(nameof(GetTestCases))]
         public void Calculates_Decimal_Ranges(DecimalRangeCalculatorTestCase testCase)
         {
@@ -42,6 +43,7 @@ namespace RegexGeneratorTests.Tests.Services
             }
             
             ValidateRanges(minDecimal, maxDecimal, decimalRanges);
+            
             Assert.AreEqual(testCase.ExpectedRanges.Length, decimalRanges.Count, "Range count mismatch");
             
             for (var i = 0; i < testCase.ExpectedRanges.Length; i++)
