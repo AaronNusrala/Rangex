@@ -2,11 +2,11 @@ namespace RegexGeneratorTests.TestCases.TestCaseModels.DecimalRangeCalculatorTes
 
 public class DecimalRangeCalculatorTestCase
 {
-    public decimal Min { get; set; }
+    public decimal Min { get; init; }
             
-    public decimal Max { get; set; }
+    public decimal Max { get; init; }
     
-    public ExpectedDecimalRange[] ExpectedRanges { get; set; }
+    public ExpectedDecimalRange[] ExpectedRanges { get; init; }
 
     public override string ToString() => $"{Min} => {Max}";
 }

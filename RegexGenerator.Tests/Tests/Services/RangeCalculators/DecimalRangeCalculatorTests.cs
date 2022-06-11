@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using RegexGenerator.Models;
-using RegexGenerator.Services;
+using RegexGenerator.Services.RangeCalculators;
 using RegexGeneratorTests.TestCases;
 using RegexGeneratorTests.TestCases.TestCaseModels.DecimalRangeCalculatorTests;
 
-namespace RegexGeneratorTests.Tests.Services
+namespace RegexGeneratorTests.Tests.Services.RangeCalculators
 {
     [TestFixture]
     internal class DecimalRangeCalculatorTests
@@ -71,7 +70,7 @@ namespace RegexGeneratorTests.Tests.Services
             var valueCharacters = doubleCharacters.Skip(decimalLeadingZeros);
             var valueString = string.Join("", valueCharacters);
             var decimalValue = int.Parse(valueString);
-            return new RegexDecimal(decimalValue, decimalLeadingZeros);
+            return new RegexDecimal(decimalLeadingZeros, decimalValue);
         }
 
         private static void AssertDecimalsAreEqual(RegexDecimal d1, RegexDecimal d2)

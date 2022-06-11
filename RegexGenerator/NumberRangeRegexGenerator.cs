@@ -1,63 +1,58 @@
-﻿using RegexGenerator.Services;
+﻿using RegexGenerator.Models;
+using RegexGenerator.Services;
 
-namespace RegexGenerator
+
+namespace RegexGenerator;
+
+public interface INumberRangeRegexGenerator
 {
-    internal class NumberRangeRegexGenerator
+    public string GenerateRegex(string min, string max, RegexGeneratorOptions? options = null);
+
+    public string GenerateRegex(int min, int max, RegexGeneratorOptions? options = null);
+}
+
+public class NumberRangeRegexGenerator : INumberRangeRegexGenerator
+{
+    private readonly INumericInputStringParser _inputParser;
+    private readonly IRegexRangeService _rangeService;
+    private readonly IRangesToRegexConverter _rangesConverter;
+
+    internal NumberRangeRegexGenerator(
+        INumericInputStringParser inputParser,
+        IRegexRangeService rangeService,
+        IRangesToRegexConverter rangesConverter)
     {
-        private readonly IRangeCalculator _rangeCalculator;
-        private readonly IRegexBuilder _regexBuilder;
+        _inputParser = inputParser;
+        _rangeService = rangeService;
+        _rangesConverter = rangesConverter;
+    }
+    
+    //DIY DI is good enough for this. Register this class with your container of choice, or don't.
+    public NumberRangeRegexGenerator() : this(
+        new NumericInputStringParser(),
+        new RegexRangeService(),
+        new RangesToRegexConverter()){ }
+    
+    public string GenerateRegex(string min, string max, RegexGeneratorOptions? options = null)
+    {
+        var input = _inputParser.ParseInput(min, max);
+        return ProcessInput(input);
+    }
 
-        public NumberRangeRegexGenerator(IRangeCalculator rangeCalculator, IRegexBuilder regexBuilder)
+    public string GenerateRegex(int min, int max, RegexGeneratorOptions? options = null)
+    {
+        var input = new InputRange
         {
-            _rangeCalculator = rangeCalculator;
-            _regexBuilder = regexBuilder;
-        }
+            Min = new RegexNumber {Integer = min},
+            Max = new RegexNumber {Integer = max}
+        };
 
-        public string GenerateRegex(int min, int max)
-        {
-            var ranges = _rangeCalculator
-                .CalculateRanges(min, max)
-                .OrderBy(r => r.Min);
-
-            using var enumerator = ranges.GetEnumerator();
-            var moreRanges = enumerator.MoveNext();
-
-            _regexBuilder
-                .BeginString()
-                .Group();
-
-            while (moreRanges)
-            {
-                var (rangeMin, rangeMax) = enumerator.Current;
-                var minString = rangeMin.ToString();
-                var maxString = rangeMax.ToString();
-
-                for (var i = 0; i < minString.Length; i++)
-                {
-                    var minChar = minString[i];
-                    var maxChar = maxString[i];
-
-                    if (minChar == maxChar)
-                    {
-                        _regexBuilder.MatchLiteralCharacter(minChar);
-                    }
-                    else
-                    {
-                        _regexBuilder.CharacterClassRange(minChar, maxChar);
-                    }
-                }
-
-                // ReSharper disable once AssignmentInConditionalExpression, this is intentional
-                if (moreRanges = enumerator.MoveNext())
-                {
-                    _regexBuilder.Or();
-                }
-            }
-
-            return _regexBuilder
-                .EndGroup()
-                .EndString()
-                .ToRegex();
-        }
+        return ProcessInput(input);
+    }
+    
+    private string ProcessInput(InputRange input)
+    {
+        var ranges = _rangeService.GetRegexRanges(input);
+        return _rangesConverter.ConvertRanges(ranges);
     }
 }

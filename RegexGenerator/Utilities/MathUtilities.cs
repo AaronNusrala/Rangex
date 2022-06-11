@@ -1,4 +1,4 @@
-namespace RegexGenerator;
+namespace RegexGenerator.Utilities;
 
 public static class MathUtilities
 {
@@ -67,4 +67,8 @@ public static class MathUtilities
         var t = 10.Pow(index + 1);
         return value - value % t;
     }
+    
+    //DigitAt(123, 1) -> 2
+    public static int DigitAt(this int value, int index) =>
+        value / 10.Pow(index) % 10;
 }

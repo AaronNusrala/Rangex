@@ -1,14 +1,19 @@
-﻿namespace RegexGenerator.Models
+﻿using RegexGenerator.Utilities;
+
+namespace RegexGenerator.Models
 {
-    internal sealed class RegexDecimal
+    public sealed class RegexDecimal
     {
+        private int? _valueMagnitude;
         public static RegexDecimal Zero => new(0, 0);
-        
+
         public int Value { get; }
 
         public int LeadingZeros { get; }
 
-        public RegexDecimal(int value, int leadingZeros)
+        public int ValueMagnitude => _valueMagnitude ??= Value.GetMagnitude();
+
+        public RegexDecimal(int leadingZeros, int value)
         {
             if (value < 0 || leadingZeros < 0)
             {

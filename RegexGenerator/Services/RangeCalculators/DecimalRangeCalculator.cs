@@ -1,6 +1,7 @@
 ﻿using RegexGenerator.Models;
+using RegexGenerator.Utilities;
 
-namespace RegexGenerator.Services
+namespace RegexGenerator.Services.RangeCalculators
 {
     internal interface IDecimalRangeCalculator
     {
@@ -23,7 +24,7 @@ namespace RegexGenerator.Services
             else
             {
                 var newMaxValue = max.Value.TrimTrailingZeros();
-                max = new RegexDecimal(newMaxValue, max.LeadingZeros);
+                max = new RegexDecimal(max.LeadingZeros, newMaxValue);
             }
             
             var initialRange = new RegexDecimalRange(max, max);
@@ -37,13 +38,11 @@ namespace RegexGenerator.Services
             var upperRanges = GetUpperRanges(initialRange.Min);
             var lowerRanges = new List<RegexDecimalRange>();
             var lowerRange = CompleteRangeFromMin(min);
-            var iterations = 0;
 
-            while (iterations < 10000)
+            while (true)
             {
-                iterations++;
-                if (lowerRange.Min.Value.TrimTrailingZeros() == initialRange.Min.Value.TrimTrailingZeros() 
-                    && lowerRange.Min.LeadingZeros == initialRange.Min.LeadingZeros)
+                if (lowerRange.Min.LeadingZeros == initialRange.Min.LeadingZeros && 
+                    lowerRange.Min.Value.TrimTrailingZeros() == initialRange.Min.Value.TrimTrailingZeros())
                 {
                     return lowerRanges.Append(initialRange);
                 }
@@ -62,8 +61,8 @@ namespace RegexGenerator.Services
                     }
 
                     if (lowerRange.Max.Value == upperRange.Min.Value - 1
-                        && ((upperRange.Min.LeadingZeros == lowerRange.Min.LeadingZeros && lowerRange.Max.Value.GetMagnitude() == upperRange.Min.Value.GetMagnitude())
-                            || (lowerRange.Max.LeadingZeros - upperRange.Min.LeadingZeros == 1 && lowerRange.Max.Value.GetMagnitude() == upperRange.Max.Value.GetMagnitude() - 1)))
+                        && (upperRange.Min.LeadingZeros == lowerRange.Min.LeadingZeros && lowerRange.Max.ValueMagnitude == upperRange.Min.ValueMagnitude
+                            || lowerRange.Max.LeadingZeros - upperRange.Min.LeadingZeros == 1 && lowerRange.Max.ValueMagnitude == upperRange.Max.ValueMagnitude - 1))
                     {
                         return lowerRanges
                             .Append(lowerRange)
@@ -75,24 +74,22 @@ namespace RegexGenerator.Services
                 lowerRanges.Add(lowerRange);
                 lowerRange = GetNextHigherRange(lowerRange.Max);
             }
-
-            throw new Exception($"intersection not found after {iterations} iterations");
         }
 
         private static RegexDecimal NormalizeMagnitude(RegexDecimal min, RegexDecimal max)
         {
-            var magnitudeDiff = max.Value.GetMagnitude() - min.Value.GetMagnitude() + (max.LeadingZeros - min.LeadingZeros);
+            var magnitudeDiff = max.ValueMagnitude - min.ValueMagnitude + (max.LeadingZeros - min.LeadingZeros);
             
             if (magnitudeDiff > 0)
             {
                 var newMinValue = min.Value * 10.Pow(magnitudeDiff);
-                min = new RegexDecimal(newMinValue, min.LeadingZeros);
+                min = new RegexDecimal(min.LeadingZeros, newMinValue);
             }
              
             if(magnitudeDiff < 0)
             {
                 var newMinValue = min.Value.TrimTrailingZeros(-magnitudeDiff);
-                min = new RegexDecimal(newMinValue, min.LeadingZeros);
+                min = new RegexDecimal(min.LeadingZeros, newMinValue);
             }
 
             return min;
@@ -101,22 +98,14 @@ namespace RegexGenerator.Services
         private static List<RegexDecimalRange> GetUpperRanges(RegexDecimal max)
         {
             var upperRanges = new List<RegexDecimalRange>();
-
-            var iterations = 0;
             
-            while (max.Value > 0 && iterations <= 10000)
+            while (max.Value > 0)
             {
                 var upperRange = GetNextLowerRange(max);
                 upperRanges.Insert(0, upperRange);
                 max = upperRange.Min;
-                iterations++;
             }
-
-            if (iterations == 10000)
-            {
-                throw new Exception("Failed to get next ranges inifinite loop detected");
-            }
-
+            
             return upperRanges;
         }
         
@@ -124,15 +113,16 @@ namespace RegexGenerator.Services
         {
             if (previousMin.Value == 0)
             {
-                throw new Exception($"Can't go any lower than {previousMin}. If this happens, there is a bug.");
+                //If this happens, there is a bug.
+                throw new Exception($"Can't go any lower than {previousMin}.");
             }
             
             var nextMaxValue = previousMin.Value.TrimTrailingZeros(1);
             var nextMaxLeadingZeros = nextMaxValue.TrimTrailingZeros() == 1 ? previousMin.LeadingZeros + 1 : previousMin.LeadingZeros;
             nextMaxValue = nextMaxValue == 1 ? 9 : nextMaxValue - 1;
-            var nextMax = new RegexDecimal(nextMaxValue, nextMaxLeadingZeros);
+            var nextMax = new RegexDecimal(nextMaxLeadingZeros, nextMaxValue);
             var newMinValue = nextMax.Value - nextMax.Value % 10;
-            var nextMin = new RegexDecimal(newMinValue, nextMaxLeadingZeros);
+            var nextMin = new RegexDecimal(nextMaxLeadingZeros, newMinValue);
             return new RegexDecimalRange(nextMin, nextMax);
         }
 
@@ -140,24 +130,25 @@ namespace RegexGenerator.Services
         {
             if (previousMax.Value.ToString().All(c => c == '9') && previousMax.LeadingZeros == 0)
             {
-                throw new Exception($"Can't go any higher than {previousMax}. If this happens, there is a bug.");
+                //If this happens, there is a bug.
+                throw new Exception($"Can't go any higher than {previousMax}.");
             }
             
             var nextMaxValue = previousMax.Value + 1;
             
-            var nextMaxLeadingZeros = nextMaxValue.GetMagnitude() > previousMax.Value.GetMagnitude() 
+            var nextMaxLeadingZeros = nextMaxValue.GetMagnitude() > previousMax.ValueMagnitude 
                 ? previousMax.LeadingZeros - 1 
                 : previousMax.LeadingZeros;
             
             nextMaxValue = nextMaxValue.TrimTrailingZeros(1);
-            var nextMin = new RegexDecimal(nextMaxValue, nextMaxLeadingZeros);
+            var nextMin = new RegexDecimal(nextMaxLeadingZeros, nextMaxValue);
             return CompleteRangeFromMin(nextMin);
         }
 
         private static RegexDecimalRange CompleteRangeFromMin(RegexDecimal min)
         {
             var maxValue = min.Value - min.Value % 10 + 9;
-            var max = new RegexDecimal(maxValue, min.LeadingZeros);
+            var max = new RegexDecimal(min.LeadingZeros, maxValue);
             return new RegexDecimalRange(min, max);
         }
 

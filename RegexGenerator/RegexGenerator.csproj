@@ -6,7 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 <ItemGroup>
-	<InternalsVisibleTo Include="RegexGeneratorTests" />
+	<InternalsVisibleTo Include="RegexGenerator.Tests" />
+    <InternalsVisibleTo Include="RegexGenerator.DependencyInjection" />
 </ItemGroup>
 
 </Project>

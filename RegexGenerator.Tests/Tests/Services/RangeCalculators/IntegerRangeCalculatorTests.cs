@@ -4,26 +4,26 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using RegexGenerator.Models;
-using RegexGenerator.Services;
+using RegexGenerator.Services.RangeCalculators;
 using RegexGeneratorTests.TestCases;
 using RegexGeneratorTests.TestCases.TestCaseModels.RangeCalculatorTests;
 
-namespace RegexGeneratorTests.Tests.Services
+namespace RegexGeneratorTests.Tests.Services.RangeCalculators
 {
     [TestFixture]
-    public class RangeCalculatorTests
+    public class IntegerRangeCalculatorTests
     {
-        private RangeCalculator? _rangeCalculator;
+        private IntegerRangeCalculator? _rangeCalculator;
 
         [SetUp]
         public void Setup()
         {
-            _rangeCalculator = new RangeCalculator();
+            _rangeCalculator = new IntegerRangeCalculator();
         }
         
         public static RangeCalculatorTestCase[]? GetTestCases()
         {
-            return TestCaseUtility.GetTestCases<RangeCalculatorTestCase[]>(nameof(RangeCalculatorTests));
+            return TestCaseUtility.GetTestCases<RangeCalculatorTestCase[]>(nameof(IntegerRangeCalculatorTests));
         }
         
         [TestCaseSource(nameof(GetTestCases))]
@@ -56,7 +56,7 @@ namespace RegexGeneratorTests.Tests.Services
             }
         }
         
-        private static void ValidateRanges(int min, int max, List<RegexRange> ranges)
+        private static void ValidateRanges(int min, int max, List<IntegerRegexRange> ranges)
         {
             ranges = ranges.OrderBy(r => r.Min).ToList();
             
@@ -81,7 +81,7 @@ namespace RegexGeneratorTests.Tests.Services
             }
         }
 
-        private static string CreateMessage(IEnumerable<ExpectedRange> expectedRanges, IEnumerable<RegexRange> actualRanges)
+        private static string CreateMessage(IEnumerable<ExpectedRange> expectedRanges, IEnumerable<IntegerRegexRange> actualRanges)
         {
             var sb = new StringBuilder();
             sb.Append("Expected: ");
