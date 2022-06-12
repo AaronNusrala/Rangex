@@ -4,7 +4,7 @@ namespace RegexGenerator.Services;
 
 internal interface IRangesToRegexConverter
 {
-    string ConvertRanges(List<RegexRange> ranges);
+    string ConvertRanges(IEnumerable<RegexRange> ranges);
 }
 
 internal class RangesToRegexConverter : IRangesToRegexConverter
@@ -18,7 +18,7 @@ internal class RangesToRegexConverter : IRangesToRegexConverter
 
     public RangesToRegexConverter() : this(new RegexBuilder()) { }
 
-    public string ConvertRanges(List<RegexRange> ranges)
+    public string ConvertRanges(IEnumerable<RegexRange> ranges)
     {
         // using var enumerator = ranges.GetEnumerator();
         // var moreRanges = enumerator.MoveNext();

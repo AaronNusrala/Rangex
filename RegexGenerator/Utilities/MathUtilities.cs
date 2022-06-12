@@ -3,13 +3,16 @@ namespace RegexGenerator.Utilities;
 public static class MathUtilities
 {
     /// <summary>
-    /// Good enough integer exponents.
+    /// Good enough integer exponents. Positive exponents only.
     /// </summary>
-    /// <param name="value">number</param>
-    /// <param name="exponent"></param>
     /// <returns>The value raised to the exponent</returns>
     public static int Pow(this int value, int exponent)
     {
+        if (exponent < 0)
+        {
+            throw new Exception("Exponent cannot be less than zero. Try using a better math library.");
+        }
+        
         if (exponent == 0)
         {
             return 1;

@@ -1,4 +1,5 @@
 ﻿using RegexGenerator.Models;
+using RegexGenerator.Models.Input;
 using RegexGenerator.Services;
 
 
@@ -43,8 +44,8 @@ public class NumberRangeRegexGenerator : INumberRangeRegexGenerator
     {
         var input = new InputRange
         {
-            Min = new RegexNumber {Integer = min},
-            Max = new RegexNumber {Integer = max}
+            Min = new InputNumber {Integer = min},
+            Max = new InputNumber {Integer = max}
         };
 
         return ProcessInput(input);
@@ -52,7 +53,7 @@ public class NumberRangeRegexGenerator : INumberRangeRegexGenerator
     
     private string ProcessInput(InputRange input)
     {
-        var ranges = _rangeService.GetRegexRanges(input);
+        var ranges = _rangeService.GetRegexRanges(input).ToList();
         return _rangesConverter.ConvertRanges(ranges);
     }
 }

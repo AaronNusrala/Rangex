@@ -1,4 +1,5 @@
 using RegexGenerator.Models;
+using RegexGenerator.Models.Input;
 
 namespace RegexGenerator.Services;
 
@@ -21,7 +22,7 @@ internal class NumericInputStringParser : INumericInputStringParser
         };
     }
 
-    private static RegexNumber ParseString(string input)
+    private static InputNumber ParseString(string input)
     {
         if (string.IsNullOrWhiteSpace(input))
         {
@@ -60,7 +61,7 @@ internal class NumericInputStringParser : INumericInputStringParser
             isNegative = false; //Not going to deal with negative zero.
         }
 
-        return new RegexNumber
+        return new InputNumber
         {
             IsNegative = isNegative,
             Integer = regexInteger,
