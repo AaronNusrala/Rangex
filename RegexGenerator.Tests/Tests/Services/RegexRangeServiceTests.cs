@@ -11,11 +11,11 @@ public class RegexRangeServiceTests
     [SetUp]
     public void Setup() => _rangeService = new();
 
-    [TestCase("-1000", "200")]
+    [TestCase("-331.24", "-3.14")]
     public void Test(string min, string max)
     {
         var parser = new NumericInputStringParser();
-        var input = parser.ParseInput(min, max);
+        var input = parser.ParseInput(min, max); //cheating
         var ranges = _rangeService.GetRegexRanges(input);
 
         foreach (var range in ranges)

@@ -42,13 +42,7 @@ public class NumberRangeRegexGenerator : INumberRangeRegexGenerator
 
     public string GenerateRegex(int min, int max, RegexGeneratorOptions? options = null)
     {
-        var input = new InputRange
-        {
-            Min = new InputNumber {Integer = min},
-            Max = new InputNumber {Integer = max}
-        };
-
-        return ProcessInput(input);
+        throw new NotImplementedException();
     }
     
     private string ProcessInput(InputRange input)

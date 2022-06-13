@@ -26,7 +26,7 @@ internal class NumericInputStringParser : INumericInputStringParser
     {
         if (string.IsNullOrWhiteSpace(input))
         {
-            throw new Exception("Input is not a valid number");
+            throw InvalidNumber();
         }
         
         var isNegative = input[0] == '-';
@@ -40,7 +40,7 @@ internal class NumericInputStringParser : INumericInputStringParser
 
         if (parts.Length > 2)
         {
-            throw new Exception("Input is not a valid number");
+            throw InvalidNumber();
         }
 
         if (int.TryParse(parts[0], out var regexInteger))
@@ -49,7 +49,7 @@ internal class NumericInputStringParser : INumericInputStringParser
         }
         else if(parts[0] != string.Empty)
         {
-            throw new Exception("Input is not a valid number");
+            throw InvalidNumber();
         }
             
         var regexDecimal = parts.Length > 1
@@ -61,13 +61,10 @@ internal class NumericInputStringParser : INumericInputStringParser
             isNegative = false; //Not going to deal with negative zero.
         }
 
-        return new InputNumber
-        {
-            IsNegative = isNegative,
-            Integer = regexInteger,
-            Decimal = regexDecimal
-        };
+        return new InputNumber(isNegative, regexInteger, regexDecimal);
     }
+
+    private static Exception InvalidNumber() => new("Input is not a valid number");
     
     private static RegexDecimal DecimalFromString(string input)
     {

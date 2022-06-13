@@ -8,5 +8,17 @@ public class InputNumber
     
     public RegexDecimal? Decimal { get; init; }
 
+    public InputNumber(bool isNegative, int integer, RegexDecimal? @decimal)
+    {
+        if (integer < 0)
+        {
+            throw new Exception("Integer cannot be less than 0");
+        }
+        
+        IsNegative = isNegative;
+        Integer = integer;
+        Decimal = @decimal;
+    }
+
     public override string ToString() => (IsNegative ? "-" : "") + Integer + Decimal;
 }

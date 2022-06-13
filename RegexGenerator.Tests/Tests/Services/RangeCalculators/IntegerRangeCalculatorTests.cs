@@ -33,6 +33,11 @@ namespace RegexGeneratorTests.Tests.Services.RangeCalculators
                 .CalculateRanges(testCase.Min, testCase.Max)
                 .ToList()
                 ?? throw new Exception("Range calculator not initialized");
+
+            foreach (var range in actualRanges)
+            {
+                Console.Write(range);
+            }
             
             ValidateRanges(testCase.Min, testCase.Max, actualRanges);
             

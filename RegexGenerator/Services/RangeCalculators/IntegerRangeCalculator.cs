@@ -28,7 +28,7 @@ internal class IntegerRangeCalculator : IIntegerRangeCalculator
             var bottomRange = SplitLower(i, min);
             var topRange = SplitUpper(i, max);
 
-            //TODO try to write a test case where this if is necessary
+            //TODO try to write a test case to test if this is necessary
             if (topRange != null && bottomRange?.Max == topRange.Min - 1)
             {
                 return lowerRanges

@@ -1,4 +1,3 @@
-using RegexGenerator.Models;
 using RegexGenerator.Models.Input;
 using RegexGenerator.Utilities;
 
@@ -31,10 +30,10 @@ public class InputRangeValidator : IInputRangeValidator
             throw InvalidRange();
         }
         
-        //Sign is same, check integer value
+        //Signs are same, check integer value
         
         var bothNegative = min.IsNegative && max.IsNegative;
-        var bothPositive = !bothNegative;
+        var bothPositive = !bothNegative; //this works because we know the signs are the same
 
         if (bothPositive && min.Integer > max.Integer)
         {
@@ -65,7 +64,7 @@ public class InputRangeValidator : IInputRangeValidator
         //(1.1, 1) -> bad
         //(1.0, 1) -> OK
         //min is positive and has a non zero decimal, max is positive and doesn't have a decimal
-        if (min.Decimal != null && min.Decimal.Value != 0 && max.Decimal == null && bothPositive)
+        if (bothPositive && min.Decimal != null && min.Decimal.Value != 0 && max.Decimal == null)
         {
             throw InvalidRange();
         }
@@ -73,7 +72,7 @@ public class InputRangeValidator : IInputRangeValidator
         //(-1, -1.1) -> bad
         //(-1, -1.0) -> OK
         //max is negative and has a non zero decimal, min is negative and doesn't have a decimal
-        if (min.Decimal == null && max.Decimal != null && max.Decimal.Value != 0 && bothNegative)
+        if (bothNegative && min.Decimal == null && max.Decimal != null && max.Decimal.Value != 0)
         {
             throw InvalidRange();
         }
@@ -87,20 +86,30 @@ public class InputRangeValidator : IInputRangeValidator
         //At this point, both min and max have decimals
 
         //(.01, .0001) -> bad
-        if (min.Decimal.LeadingZeros < max.Decimal.LeadingZeros && bothPositive)
+        if (bothPositive && min.Decimal.LeadingZeros < max.Decimal.LeadingZeros)
         {
             throw InvalidRange();
         }
 
         //(-.0001, -.01) -> bad
-        if (min.Decimal.LeadingZeros > max.Decimal.LeadingZeros && bothNegative)
+        if (bothNegative && min.Decimal.LeadingZeros > max.Decimal.LeadingZeros)
         {
             throw InvalidRange();
         }
         
         //at this point both min and max decimals have the same number of leading zeros
-        if (bothPositive && min.Decimal.Value.TrimTrailingZeros() > max.Decimal.Value.TrimTrailingZeros()
-            || bothNegative && min.Decimal.Value.TrimTrailingZeros() < max.Decimal.Value.TrimTrailingZeros())
+
+        var trimmedMin = min.Decimal.Value.TrimTrailingZeros();
+        var trimmedMax = max.Decimal.Value.TrimTrailingZeros();
+        
+        //(.02, .01) -> bad
+        if (bothPositive && trimmedMin > trimmedMax)
+        {
+            throw InvalidRange();
+        }
+
+        //(-.01, -.02) -> bad
+        if (bothNegative && trimmedMin < trimmedMax)
         {
             throw InvalidRange();
         }
