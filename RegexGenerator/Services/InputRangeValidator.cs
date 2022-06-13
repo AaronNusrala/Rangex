@@ -85,13 +85,22 @@ public class InputRangeValidator : IInputRangeValidator
         
         //At this point, both min and max have decimals
 
-        //(.01, .0001) -> bad
+        if (bothPositive && min.Decimal.LeadingZeros > max.Decimal.LeadingZeros)
+        {
+            return;
+        }
+
         if (bothPositive && min.Decimal.LeadingZeros < max.Decimal.LeadingZeros)
         {
             throw InvalidRange();
         }
 
         //(-.0001, -.01) -> bad
+        if (bothNegative && min.Decimal.LeadingZeros < max.Decimal.LeadingZeros)
+        {
+            return;
+        }
+        
         if (bothNegative && min.Decimal.LeadingZeros > max.Decimal.LeadingZeros)
         {
             throw InvalidRange();

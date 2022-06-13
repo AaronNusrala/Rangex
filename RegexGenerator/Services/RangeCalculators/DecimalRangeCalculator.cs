@@ -27,6 +27,7 @@ namespace RegexGenerator.Services.RangeCalculators
                 max = new RegexDecimal(max.LeadingZeros, newMaxValue);
             }
             
+            //need to make this optional.
             var initialRange = new RegexDecimalRange(max, max);
 
             if (min.LeadingZeros == max.LeadingZeros && min.Value == max.Value)

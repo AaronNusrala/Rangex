@@ -145,7 +145,7 @@ internal class RegexRangeService : IRegexRangeService
         //(-100, 50) -> +-(0, 50), -(50, 100)
         if (min.Integer > max.Integer)
         {
-            var lowerRanges = GetIntegerRanges(max.Integer, min.Integer, Sign.Negative).Reverse();
+            var lowerRanges = GetIntegerRanges(max.Integer, min.Integer + 1, Sign.Negative).Reverse();
             var upperRanges = GetIntegerRanges(0, max.Integer, Sign.PositiveOrNegative);
             return lowerRanges.Concat(upperRanges);
         }
@@ -154,7 +154,7 @@ internal class RegexRangeService : IRegexRangeService
         if (min.Integer < max.Integer)
         {
             var lowerRanges = GetIntegerRanges(0, min.Integer, Sign.PositiveOrNegative);
-            var upperRanges = GetIntegerRanges(min.Integer, max.Integer, Sign.Positive);
+            var upperRanges = GetIntegerRanges(min.Integer + 1, max.Integer, Sign.Positive);
             return lowerRanges.Concat(upperRanges);
         }
 

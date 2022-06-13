@@ -11,7 +11,7 @@ public class RegexRangeServiceTests
     [SetUp]
     public void Setup() => _rangeService = new();
 
-    [TestCase("-331.24", "-3.14")]
+    [TestCase("-40.0", "40.0")]
     public void Test(string min, string max)
     {
         var parser = new NumericInputStringParser();
