@@ -11,19 +11,19 @@ using RegexGeneratorTests.TestCases.TestCaseModels.RangeCalculatorTests;
 namespace RegexGeneratorTests.Tests.Services.RangeCalculators
 {
     [TestFixture]
-    public class IntegerRangeCalculatorTests
+    public class UnsignedIntegerRangeCalculatorTests
     {
-        private IntegerRangeCalculator? _rangeCalculator;
+        private UnsignedIntegerRangeCalculator? _rangeCalculator;
 
         [SetUp]
         public void Setup()
         {
-            _rangeCalculator = new IntegerRangeCalculator();
+            _rangeCalculator = new UnsignedIntegerRangeCalculator();
         }
         
         public static RangeCalculatorTestCase[]? GetTestCases()
         {
-            return TestCaseUtility.GetTestCases<RangeCalculatorTestCase[]>(nameof(IntegerRangeCalculatorTests));
+            return TestCaseUtility.GetTestCases<RangeCalculatorTestCase[]>(nameof(UnsignedIntegerRangeCalculatorTests));
         }
         
         [TestCaseSource(nameof(GetTestCases))]
@@ -71,18 +71,18 @@ namespace RegexGeneratorTests.Tests.Services.RangeCalculators
                 var rangeMin = currentRange.Min.ToString();
                 var rangeMax = currentRange.Max.ToString();
                 
-                Assert.AreEqual(rangeMin.Length, rangeMax.Length);
+                Assert.That(rangeMin.Length, Is.EqualTo(rangeMax.Length));
         
                 for (var j = 1; j < rangeMin.Length; j++)
                 {
                     var minChar = rangeMin[j];
                     var maxChar = rangeMax[j];
-                    Assert.IsTrue(minChar <= maxChar);
+                    Assert.That(minChar, Is.LessThanOrEqualTo(maxChar));
                 }
         
                 var nextRange = ranges[i + 1];
                 var rangeDiff = nextRange.Min - currentRange.Max;
-                Assert.AreEqual(1, rangeDiff, $"({min}, {max})");
+                Assert.That(rangeDiff, Is.EqualTo(1), $"({min}, {max})");
             }
         }
 

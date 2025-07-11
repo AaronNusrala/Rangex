@@ -1,32 +1,33 @@
 using System;
 using NUnit.Framework;
 using RegexGenerator.Services;
+using RegexGenerator.Services.InputParsers;
 
 namespace RegexGeneratorTests.Tests.Services;
 
 [TestFixture]
-public class NumericInputStringParserTests
+public class DecimalInputParserTests
 {
-    private NumericInputStringParser? _parser;
+    private DecimalInputParser? _parser;
     
     [SetUp]
-    public void Setup() => _parser = new NumericInputStringParser();
+    public void Setup() => _parser = new DecimalInputParser();
 
     [Test]
     public void Test()
     {
-        var inputRange = _parser?.ParseInput("-100", "2000.0809") 
+        var inputRange = _parser?.ParseInput("-100", "2000.08090") 
                          ?? throw new Exception("Parser not initialized");
         
-        Assert.IsNotNull(inputRange);
-        Assert.IsTrue(inputRange.Min.IsNegative);
-        Assert.AreEqual(100, inputRange.Min.Integer);
-        Assert.IsNull(inputRange.Min.Decimal);
+        Assert.That(inputRange, Is.Not.Null);
+        Assert.That(inputRange.Min.IsNegative);
+        Assert.That(inputRange.Min.Integer, Is.EqualTo(100));
+        Assert.That(inputRange.Min.Fractional?.Value, Is.EqualTo(0));
         
-        Assert.IsFalse(inputRange.Max.IsNegative);
-        Assert.AreEqual(2000, inputRange.Max.Integer);
-        Assert.AreEqual(1, inputRange.Max.Decimal?.LeadingZeros);
-        Assert.AreEqual(809, inputRange.Max.Decimal?.Value);
+        Assert.That(inputRange.Max.IsNegative, Is.False);
+        Assert.That(inputRange.Max.Integer, Is.EqualTo(2000));
+        Assert.That(inputRange.Max.Fractional?.LeadingZeros, Is.EqualTo(1));
+        Assert.That(inputRange.Max.Fractional?.Value, Is.EqualTo(8090));
     }
 
     [TestCase(".1", ".2")]

@@ -10,19 +10,19 @@ using RegexGeneratorTests.TestCases.TestCaseModels.DecimalRangeCalculatorTests;
 namespace RegexGeneratorTests.Tests.Services.RangeCalculators
 {
     [TestFixture]
-    internal class DecimalRangeCalculatorTests
+    internal class UnsignedFractionalRangeCalculatorTests
     {
-        private DecimalRangeCalculator? _rangeCalculator;
+        private UnsignedFractionalRangeCalculator? _rangeCalculator;
 
         [SetUp]
         public void Setup()
         {
-            _rangeCalculator = new DecimalRangeCalculator();
+            _rangeCalculator = new UnsignedFractionalRangeCalculator();
         }
 
         public static DecimalRangeCalculatorTestCase[]? GetTestCases()
         {
-            return TestCaseUtility.GetTestCases<DecimalRangeCalculatorTestCase[]>(nameof(DecimalRangeCalculatorTests));
+            return TestCaseUtility.GetTestCases<DecimalRangeCalculatorTestCase[]>(nameof(UnsignedFractionalRangeCalculatorTests));
         }
 
         [Test, TestCaseSource(nameof(GetTestCases))]
@@ -32,7 +32,7 @@ namespace RegexGeneratorTests.Tests.Services.RangeCalculators
             var maxDecimal = FromDecimal(testCase.Max);
             
             var decimalRanges = _rangeCalculator?
-                .GetRanges(minDecimal, maxDecimal)
+                .GetRanges(minDecimal, maxDecimal, false)
                 .ToList()
                 ?? throw new Exception("Range calculator is not initialized");
             
@@ -43,7 +43,7 @@ namespace RegexGeneratorTests.Tests.Services.RangeCalculators
             
             ValidateRanges(minDecimal, maxDecimal, decimalRanges);
             
-            Assert.AreEqual(testCase.ExpectedRanges.Length, decimalRanges.Count, "Range count mismatch");
+            Assert.That(testCase.ExpectedRanges.Length, Is.EqualTo(decimalRanges.Count), "Range count mismatch");
             
             for (var i = 0; i < testCase.ExpectedRanges.Length; i++)
             {
@@ -56,7 +56,7 @@ namespace RegexGeneratorTests.Tests.Services.RangeCalculators
             }
         }
         
-        private static RegexDecimal FromDecimal(decimal value)
+        private static UnsignedRegexFractional FromDecimal(decimal value)
         {
             var doubleCharacters = value
                 .ToString()
@@ -70,16 +70,16 @@ namespace RegexGeneratorTests.Tests.Services.RangeCalculators
             var valueCharacters = doubleCharacters.Skip(decimalLeadingZeros);
             var valueString = string.Join("", valueCharacters);
             var decimalValue = int.Parse(valueString);
-            return new RegexDecimal(decimalLeadingZeros, decimalValue);
+            return new UnsignedRegexFractional(decimalLeadingZeros, decimalValue);
         }
 
-        private static void AssertDecimalsAreEqual(RegexDecimal d1, RegexDecimal d2)
+        private static void AssertDecimalsAreEqual(UnsignedRegexFractional d1, UnsignedRegexFractional d2)
         {
-            Assert.AreEqual(d1.LeadingZeros, d2.LeadingZeros, $"Expected {d1}, got {d2}");
-            Assert.AreEqual(d1.Value, d2.Value, $"Expected {d1}, got {d2}");
+            Assert.That(d1.LeadingZeros, Is.EqualTo(d2.LeadingZeros), $"Expected {d1}, got {d2}");
+            Assert.That(d1.Value, Is.EqualTo(d2.Value), $"Expected {d1}, got {d2}");
         }
 
-        private static void ValidateRanges(RegexDecimal min, RegexDecimal max, List<RegexDecimalRange> ranges)
+        private static void ValidateRanges(UnsignedRegexFractional min, UnsignedRegexFractional max, List<RegexFractionalRange> ranges)
         {
             for (var i = 0; i < ranges.Count - 1; i++)
             {
@@ -87,20 +87,20 @@ namespace RegexGeneratorTests.Tests.Services.RangeCalculators
                 var rangeMin = currentRange.Min.ToString();
                 var rangeMax = currentRange.Max.ToString();
                 
-                Assert.AreEqual(rangeMin.Length, rangeMax.Length);
+                Assert.That(rangeMin.Length, Is.EqualTo(rangeMax.Length));
                 
                 for (var j = 1; j < rangeMin.Length; j++)
                 {
                     var minChar = rangeMin[j];
                     var maxChar = rangeMax[j];
-                    Assert.IsTrue(minChar <= maxChar);
+                    Assert.That(minChar, Is.LessThanOrEqualTo(maxChar));
                 }
 
                 var nextRange = ranges[i + 1];
                 var nextRangeMin = nextRange.Min.ToString();
                 var rangeDiff = decimal.Parse(nextRangeMin) - decimal.Parse(rangeMax);
                 var expectedDiff = decimal.Parse("." + new string('0', rangeMin.Length - 2) + "1");
-                Assert.AreEqual(expectedDiff, rangeDiff, $"({min}, {max})");
+                Assert.That(expectedDiff, Is.EqualTo(rangeDiff), $"({min}, {max})");
             }
         }
     }

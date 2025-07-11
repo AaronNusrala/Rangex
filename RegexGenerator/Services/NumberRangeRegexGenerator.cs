@@ -1,25 +1,18 @@
-﻿using RegexGenerator.Models;
+﻿using RegexGenerator.Interfaces;
+using RegexGenerator.Models;
 using RegexGenerator.Models.Input;
-using RegexGenerator.Services;
+using RegexGenerator.Services.InputParsers;
 
+namespace RegexGenerator.Services;
 
-namespace RegexGenerator;
-
-public interface INumberRangeRegexGenerator
+internal class NumberRangeRegexGenerator : INumberRangeRegexGenerator
 {
-    public string GenerateRegex(string min, string max, RegexGeneratorOptions? options = null);
-
-    public string GenerateRegex(int min, int max, RegexGeneratorOptions? options = null);
-}
-
-public class NumberRangeRegexGenerator : INumberRangeRegexGenerator
-{
-    private readonly INumericInputStringParser _inputParser;
+    private readonly IInputParser _inputParser;
     private readonly IRegexRangeService _rangeService;
     private readonly IRangesToRegexConverter _rangesConverter;
 
     internal NumberRangeRegexGenerator(
-        INumericInputStringParser inputParser,
+        DecimalInputParser inputParser,
         IRegexRangeService rangeService,
         IRangesToRegexConverter rangesConverter)
     {
@@ -30,10 +23,13 @@ public class NumberRangeRegexGenerator : INumberRangeRegexGenerator
     
     //DIY DI is good enough for this. Register this class with your container of choice, or don't.
     public NumberRangeRegexGenerator() : this(
-        new NumericInputStringParser(),
+        new DecimalInputParser(),
         new RegexRangeService(),
         new RangesToRegexConverter()){ }
     
+    /// <summary>
+    /// Parse and validate the input strings. If the input is valid, calculate regex-able ranges and convert them into a regex string.
+    /// </summary>
     public string GenerateRegex(string min, string max, RegexGeneratorOptions? options = null)
     {
         var input = _inputParser.ParseInput(min, max);
@@ -44,7 +40,12 @@ public class NumberRangeRegexGenerator : INumberRangeRegexGenerator
     {
         throw new NotImplementedException();
     }
-    
+
+    public string GenerateRegex(double min, double max, RegexGeneratorOptions? options = null)
+    {
+        throw new NotImplementedException();
+    }
+
     private string ProcessInput(InputRange input)
     {
         var ranges = _rangeService.GetRegexRanges(input).ToList();

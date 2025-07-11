@@ -6,9 +6,11 @@ public class InputNumber
 
     public int Integer { get; init; }
     
-    public RegexDecimal? Decimal { get; init; }
+    public UnsignedRegexFractional? Fractional { get; init; }
+    
+    public static InputNumber Zero => new InputNumber(false, 0, null);
 
-    public InputNumber(bool isNegative, int integer, RegexDecimal? @decimal)
+    public InputNumber(bool isNegative, int integer, UnsignedRegexFractional? fractional)
     {
         if (integer < 0)
         {
@@ -17,8 +19,8 @@ public class InputNumber
         
         IsNegative = isNegative;
         Integer = integer;
-        Decimal = @decimal;
+        Fractional = fractional;
     }
 
-    public override string ToString() => (IsNegative ? "-" : "") + Integer + Decimal;
+    public override string ToString() => (IsNegative ? "-" : "") + Integer + Fractional;
 }

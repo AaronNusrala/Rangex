@@ -1,29 +1,21 @@
-﻿using RegexGenerator.Utilities;
+namespace RegexGenerator.Models;
 
-namespace RegexGenerator.Models
+public class RegexDecimal
 {
-    public sealed class RegexDecimal
+    public int Integer { get; init; }
+    
+    public UnsignedRegexFractional Fractional { get; init; }
+
+    public RegexDecimal(int integer, UnsignedRegexFractional fractional)
     {
-        private int? _valueMagnitude;
-        public static RegexDecimal Zero => new(0, 0);
-
-        public int Value { get; }
-
-        public int LeadingZeros { get; }
-
-        public int ValueMagnitude => _valueMagnitude ??= Value.GetMagnitude();
-
-        public RegexDecimal(int leadingZeros, int value)
+        if (integer < 0)
         {
-            if (value < 0 || leadingZeros < 0)
-            {
-                throw new Exception();
-            }
-            
-            Value = value;
-            LeadingZeros = leadingZeros;
+            throw new ArgumentException("Integer must be positive");
         }
-
-        public override string ToString() => $".{new string('0', LeadingZeros)}{Value}";
+        
+        Integer = integer;
+        Fractional = fractional;
     }
+
+    public override string ToString() => Integer.ToString() + Fractional;
 }

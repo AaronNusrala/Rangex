@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RegexGenerator", "RegexGene
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RegexGenerator.Tests", "RegexGenerator.Tests\RegexGenerator.Tests.csproj", "{3626FB09-C017-4621-9BE3-DB1369F722D5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegexGenerator.MicrosoftDependencyInjection", "RegexGenerator.MicrosoftDependencyInjection\RegexGenerator.MicrosoftDependencyInjection.csproj", "{D8FF8DD0-F804-4EC0-860D-4E58FF100C0F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{3626FB09-C017-4621-9BE3-DB1369F722D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3626FB09-C017-4621-9BE3-DB1369F722D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3626FB09-C017-4621-9BE3-DB1369F722D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8FF8DD0-F804-4EC0-860D-4E58FF100C0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8FF8DD0-F804-4EC0-860D-4E58FF100C0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8FF8DD0-F804-4EC0-860D-4E58FF100C0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8FF8DD0-F804-4EC0-860D-4E58FF100C0F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -2,9 +2,9 @@ namespace RegexGenerator.Models.Input;
 
 public class InputRange
 {
-    public InputNumber Min { get; init; }
+    public required InputNumber Min { get; init; }
     
-    public InputNumber Max { get; init; }
+    public required InputNumber Max { get; init; }
 
     public override string ToString() => $"{Min}, {Max}";
 }

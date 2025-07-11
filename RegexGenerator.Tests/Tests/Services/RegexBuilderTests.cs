@@ -19,7 +19,7 @@ namespace RegexGeneratorTests.Tests.Services
         {
             _regexBuilder.CharacterClassRange('1', '2');
             var regex = _regexBuilder.ToRegex();
-            Assert.AreEqual("[1-2]", regex);
+            Assert.That(regex, Is.EqualTo("[1-2]"));
         }
     }
 }

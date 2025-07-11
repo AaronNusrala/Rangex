@@ -6,9 +6,9 @@ public class RegexRange
 {
     public Sign Sign { get; init; }
     
-    public RegexNumber Min { get; init; }
+    public RegexDecimal Min { get; init; }
     
-    public RegexNumber Max { get; init; }
+    public RegexDecimal Max { get; init; }
 
     public override string ToString()
     {

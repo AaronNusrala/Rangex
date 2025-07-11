@@ -10,57 +10,46 @@ internal interface IRegexRangeService
     IEnumerable<RegexRange> GetRegexRanges(InputRange inputRange);
 }
 
-internal class RegexRangeService : IRegexRangeService
+internal class RegexRangeService(
+    IIntegerRangeCalculator integerRangeCalculator,
+    IDecimalRangeCalculator decimalRangeCalculator)
+    : IRegexRangeService
 {
-    private readonly IInputRangeValidator _inputRangeValidator;
-    private readonly IIntegerRangeCalculator _integerRangeCalculator;
-    private readonly IDecimalRangeCalculator _decimalRangeCalculator;
-
-    public RegexRangeService(
-        IInputRangeValidator inputRangeValidator,
-        IIntegerRangeCalculator integerRangeCalculator, 
-        IDecimalRangeCalculator decimalRangeCalculator)
-    {
-        _inputRangeValidator = inputRangeValidator;
-        _integerRangeCalculator = integerRangeCalculator;
-        _decimalRangeCalculator = decimalRangeCalculator;
-    }
-
     public RegexRangeService() : this(
-        new InputRangeValidator(),
-        new IntegerRangeCalculator(), 
-        new DecimalRangeCalculator()) { }
+        new UnsignedIntegerRangeCalculator(), 
+        new UnsignedFractionalRangeCalculator()) { }
     
     public IEnumerable<RegexRange> GetRegexRanges(InputRange inputRange)
     {
-        _inputRangeValidator.ValidateInputRange(inputRange);
-        var (min, max) = GetAdjustedInputRange(inputRange);
+        var (min, max) = (inputRange.Min, inputRange.Max);
         
-        if (min.Decimal == null && max.Decimal == null)
+        // Integers only, ex. (1, 2)
+        if (min.Fractional == null && max.Fractional == null)
         {
             return GetIntegerRanges(min, max);
         }
         
-        //from here on, we're dealing with decimals and integers
-
+        //from here on, we're dealing with a mix of decimals and integers
+        
+        // (1.5, 1.8)
         if (min.Integer == max.Integer && min.IsNegative == max.IsNegative)
         {
             return min.IsNegative
-                ? GetDecimalRegexRanges(min, max.Decimal, min.Decimal)
-                : GetDecimalRegexRanges(min, min.Decimal, max.Decimal);
+                ? GetDecimalRegexRanges(min, max.Fractional, min.Fractional, false)
+                : GetDecimalRegexRanges(min, min.Fractional, max.Fractional, false);
         }
         
         //-1.05 -> .0, .05 
         //1.05 -> .05, .9
         var lowerDecimalRanges = min.IsNegative
-            ? GetDecimalRegexRanges(min, RegexDecimal.Zero, min.Decimal).Reverse()
-            : GetDecimalRegexRanges(min, min.Decimal, new RegexDecimal(0, 9));
+            ? GetDecimalRegexRanges(min, UnsignedRegexFractional.Zero, min.Fractional, false).Reverse()
+            : GetDecimalRegexRanges(min, min.Fractional, new UnsignedRegexFractional(0, 9), true);
 
         // -1.05 -> .05, .9
         // 1.05 -> .0, .05
         var upperDecimalRanges = max.IsNegative
-            ? GetDecimalRegexRanges(max, max.Decimal, new RegexDecimal(0, 9)).Reverse()
-            : GetDecimalRegexRanges(max, RegexDecimal.Zero, max.Decimal);
+            ? GetDecimalRegexRanges(max, max.Fractional, new UnsignedRegexFractional(0, 9), true).Reverse()
+            : GetDecimalRegexRanges(max, UnsignedRegexFractional.Zero, max.Fractional, false);
         
         if(min.IsNegative && (max.IsNegative || max.Integer == 0) && min.Integer - 1 == max.Integer)
         {
@@ -71,104 +60,90 @@ internal class RegexRangeService : IRegexRangeService
         {
             return lowerDecimalRanges.Concat(upperDecimalRanges);
         }
-        
+
         var newMinInteger = min.IsNegative
-            ? min.Integer - 1
+            ? Math.Max(min.Integer - 1, 0)
             : min.Integer + 1;
         
         var newMaxInteger = max.IsNegative
             ? max.Integer + 1
-            : max.Integer - 1;
+            : Math.Max(max.Integer - 1, 0);
         
-        min = new InputNumber(min.IsNegative, newMinInteger, min.Decimal);
-        max = new InputNumber(max.IsNegative, newMaxInteger, max.Decimal);
+        var integerRegexRanges = Enumerable.Empty<RegexRange>();
 
-        var integerRegexRanges = GetIntegerRanges(min, max);
+        if (newMinInteger != 0 && newMaxInteger != 0)
+        {
+            min = new InputNumber(min.IsNegative, newMinInteger, min.Fractional);
+            max = new InputNumber(max.IsNegative, newMaxInteger, max.Fractional);
+            integerRegexRanges = GetIntegerRanges(min, max);
+        }
         
         return lowerDecimalRanges
             .Concat(integerRegexRanges)
             .Concat(upperDecimalRanges);
     }
 
-    private IEnumerable<RegexRange> GetDecimalRegexRanges(InputNumber i, RegexDecimal min, RegexDecimal max)
+    private IEnumerable<RegexRange> GetDecimalRegexRanges(InputNumber i, UnsignedRegexFractional min, UnsignedRegexFractional max, bool allowTrailingDecimals)
     {
-        return _decimalRangeCalculator.GetRanges(min, max)
+        return decimalRangeCalculator.GetRanges(min, max, allowTrailingDecimals)
             .Select(r => 
                 new RegexRange
                 {
                     Sign = i.IsNegative ? Sign.Negative : Sign.Positive,
-                    Min = new RegexNumber(i.Integer, r.Min),
-                    Max = new RegexNumber(i.Integer, r.Max)
+                    Min = new RegexDecimal(i.Integer, r.Min),
+                    Max = new RegexDecimal(i.Integer, r.Max)
                 });
     }
-
-
-    private static (InputNumber Min, InputNumber max) GetAdjustedInputRange(InputRange inputRange)
-    {
-        var (min, max) = (inputRange.Min, inputRange.Max);
-
-        if (min.Decimal == null && max.Decimal != null)
-        {
-            min = new InputNumber(min.IsNegative, min.Integer, RegexDecimal.Zero);
-        }
-
-        if (min.Decimal != null && max.Decimal == null)
-        {
-            max = new InputNumber(max.IsNegative, max.Integer, RegexDecimal.Zero);
-        }
-
-        return (min, max);
-    }
-
+    
     /* TODO if we knew which decimal was greater regardless of the integer, we could apply the same optimizations to decimals that
-    we are using for integers. Future enhancement. (1.5, 2.7) -> ((1|2).[0-5])|(2[5-7]).  This example doesn't save anything
+    we are using for integers. Future enhancement. (1.5, 2.7) -> ((1|2).[0-5])|(2.[5-7]).  This example doesn't save anything
     but gives you the idea.*/
     private IEnumerable<RegexRange> GetIntegerRanges(InputNumber min, InputNumber max)
     {
         if (min.IsNegative && max.IsNegative)
         {
-            return GetIntegerRanges(max.Integer, min.Integer, Sign.Negative).Reverse();
+            return GetIntegerRegexRanges(max.Integer, min.Integer, Sign.Negative).Reverse();
         }
 
         if (!min.IsNegative && !max.IsNegative)
         {
-            return GetIntegerRanges(min.Integer, max.Integer, Sign.Positive);
+            return GetIntegerRegexRanges(min.Integer, max.Integer, Sign.Positive);
         }
             
         //here we know that the signs are opposite.
-
+        //(-1, 1) -> +-(0, 1)
         if (min.Integer == max.Integer)
         {
-            return GetIntegerRanges(0, min.Integer, Sign.PositiveOrNegative);
+            return GetIntegerRegexRanges(0, min.Integer, Sign.PositiveOrNegative);
         }
 
-        //(-100, 50) -> +-(0, 50), -(50, 100)
+        //(-2, 1) -> +-(0, 1), -(1, 2)
         if (min.Integer > max.Integer)
         {
-            var lowerRanges = GetIntegerRanges(max.Integer, min.Integer + 1, Sign.Negative).Reverse();
-            var upperRanges = GetIntegerRanges(0, max.Integer, Sign.PositiveOrNegative);
+            var lowerRanges = GetIntegerRegexRanges(max.Integer, min.Integer + 1, Sign.Negative).Reverse();
+            var upperRanges = GetIntegerRegexRanges(0, max.Integer, Sign.PositiveOrNegative);
             return lowerRanges.Concat(upperRanges);
         }
             
-        //(-50, 100) -> +-(0, 50), +(50, 100)
+        //(-1, 2) -> +-(0, 1), +(1, 2)
         if (min.Integer < max.Integer)
         {
-            var lowerRanges = GetIntegerRanges(0, min.Integer, Sign.PositiveOrNegative);
-            var upperRanges = GetIntegerRanges(min.Integer + 1, max.Integer, Sign.Positive);
+            var lowerRanges = GetIntegerRegexRanges(0, min.Integer, Sign.PositiveOrNegative);
+            var upperRanges = GetIntegerRegexRanges(min.Integer + 1, max.Integer, Sign.Positive);
             return lowerRanges.Concat(upperRanges);
         }
 
         throw new Exception("shouldn't happen");
     }
 
-    private IEnumerable<RegexRange> GetIntegerRanges(int min, int max, Sign sign)
+    private IEnumerable<RegexRange> GetIntegerRegexRanges(int min, int max, Sign sign)
     {
-        return _integerRangeCalculator.CalculateRanges(min, max)
+        return integerRangeCalculator.CalculateRanges(min, max)
             .Select(r => new RegexRange
             {
                 Sign = sign, 
-                Min = new RegexNumber(r.Min),
-                Max = new RegexNumber(r.Max)
+                Min = new RegexDecimal(r.Min, UnsignedRegexFractional.Zero),
+                Max = new RegexDecimal(r.Max, UnsignedRegexFractional.Zero)
             });
     }
 }

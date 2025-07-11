@@ -18,9 +18,19 @@ public static class MathUtilities
             return 1;
         }
 
+        if (exponent == 1)
+        {
+            return value;
+        }
+
         if (value == 0)
         {
             return 0;
+        }
+
+        if (value == 1)
+        {
+            return 1;
         }
 
         var result = value;
@@ -33,7 +43,9 @@ public static class MathUtilities
         return result;
     }
     
-    //12300 => 123
+    /// <summary>
+    /// If zerosToTrim is null then all trailing zeros are trimmed. ex 12300 => 123
+    /// </summary>
     public static int TrimTrailingZeros(this int value, int? zerosToTrim = null)
     {
         for (var i = 0; (i < zerosToTrim || zerosToTrim == null) && value > 0 && value % 10 == 0; i++)
@@ -72,6 +84,5 @@ public static class MathUtilities
     }
     
     //DigitAt(123, 1) -> 2
-    public static int DigitAt(this int value, int index) =>
-        value / 10.Pow(index) % 10;
+    public static int DigitAt(this int value, int index) =>  value / 10.Pow(index) % 10;
 }

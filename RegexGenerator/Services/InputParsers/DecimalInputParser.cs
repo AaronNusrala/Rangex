@@ -1,25 +1,26 @@
+using RegexGenerator.Interfaces;
 using RegexGenerator.Models;
 using RegexGenerator.Models.Input;
 
-namespace RegexGenerator.Services;
+namespace RegexGenerator.Services.InputParsers;
 
-internal interface INumericInputStringParser
+internal class DecimalInputParser(InputRangeValidator validator) : IInputParser
 {
-    InputRange ParseInput(string min, string max);
-}
-
-internal class NumericInputStringParser : INumericInputStringParser
-{
+    public DecimalInputParser() : this(new InputRangeValidator()) { }
+    
     public InputRange ParseInput(string min, string max)
     {
         var minRegexNumber = ParseString(min);
         var maxRegexNumber = ParseString(max);
-
-        return new InputRange
+        
+        var range = new InputRange
         {
             Min = minRegexNumber,
             Max = maxRegexNumber
         };
+        
+        validator.ValidateInputRange(range);
+        return range;
     }
 
     private static InputNumber ParseString(string input)
@@ -53,10 +54,10 @@ internal class NumericInputStringParser : INumericInputStringParser
         }
             
         var regexDecimal = parts.Length > 1
-            ? DecimalFromString(parts[1])
-            : null;
+            ? FractionalFromString(parts[1])
+            : UnsignedRegexFractional.Zero;
 
-        if (regexInteger == 0 && (regexDecimal == null || regexDecimal.Value == 0))
+        if (regexInteger == 0 && regexDecimal.Value == 0)
         {
             isNegative = false; //Not going to deal with negative zero.
         }
@@ -66,7 +67,7 @@ internal class NumericInputStringParser : INumericInputStringParser
 
     private static Exception InvalidNumber() => new("Input is not a valid number");
     
-    private static RegexDecimal DecimalFromString(string input)
+    private static UnsignedRegexFractional FractionalFromString(string input)
     {
         var decimalLeadingZeros = input
             .TakeWhile((c, i) => i < input.Length - 1 && c == '0')
@@ -77,7 +78,7 @@ internal class NumericInputStringParser : INumericInputStringParser
             .ToList();
         
         var valueString = string.Join("", valueCharacters);
-        var decimalValue = valueCharacters.Any() ? int.Parse(valueString) : 0;
-        return new RegexDecimal(decimalLeadingZeros, decimalValue);
+        var decimalValue = valueCharacters.Count != 0 ? int.Parse(valueString) : 0;
+        return new UnsignedRegexFractional(decimalLeadingZeros, decimalValue);
     }
 }

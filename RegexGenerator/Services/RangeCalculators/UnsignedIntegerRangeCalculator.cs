@@ -8,10 +8,10 @@ internal interface IIntegerRangeCalculator
     IEnumerable<IntegerRegexRange> CalculateRanges(int min, int max);
 }
 
-internal class IntegerRangeCalculator : IIntegerRangeCalculator
+internal class UnsignedIntegerRangeCalculator : IIntegerRangeCalculator
 {
     /// <summary>
-    /// Returns regex-able number ranges between (inclusive) the min and max parameters in ascending order.
+    /// Returns regex-able number ranges between (inclusive) the min and max positive integer parameters in ascending order.
     /// </summary>
     public IEnumerable<IntegerRegexRange> CalculateRanges(int min, int max)
     {
