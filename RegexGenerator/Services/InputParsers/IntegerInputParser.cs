@@ -7,6 +7,13 @@ public class IntegerInputParser : IInputParser
 {
     public InputRange ParseInput(string min, string max)
     {
-        throw new NotImplementedException();
+        var minInt = int.Parse(min);
+        var maxInt = int.Parse(max);
+        
+        return new InputRange
+        {
+            Min = new InputNumber(minInt),
+            Max = new InputNumber(maxInt)
+        };
     }
 }

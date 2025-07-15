@@ -7,6 +7,6 @@ public class NumberRangeRegexGeneratorFactory : INumberRangeRegexGeneratorFactor
 {
     public INumberRangeRegexGenerator Create(RegexGeneratorOptions? regexOptions = null)
     {
-        throw new NotImplementedException();
+        var  
     }
 }

@@ -1,6 +1,6 @@
 namespace RegexGenerator.Enumerations;
 
-public enum Sign
+public enum RangeSign
 {
     Positive,
     Negative,

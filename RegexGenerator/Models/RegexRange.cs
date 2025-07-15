@@ -4,19 +4,19 @@ namespace RegexGenerator.Models;
 
 public class RegexRange
 {
-    public Sign Sign { get; init; }
+    public RangeSign RangeSign { get; init; }
     
-    public RegexDecimal Min { get; init; }
+    public required UnsignedRegexDecimal Min { get; init; }
     
-    public RegexDecimal Max { get; init; }
+    public required UnsignedRegexDecimal Max { get; init; }
 
     public override string ToString()
     {
-        var signString = Sign switch
+        var signString = RangeSign switch
         {
-            Sign.Positive => "",
-            Sign.Negative => "-",
-            Sign.PositiveOrNegative => "+-",
+            RangeSign.Positive => "",
+            RangeSign.Negative => "-",
+            RangeSign.PositiveOrNegative => "+-",
             _ => throw new ArgumentOutOfRangeException()
         };
 

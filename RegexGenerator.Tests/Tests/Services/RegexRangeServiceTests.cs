@@ -13,7 +13,7 @@ public class RegexRangeServiceTests
     [SetUp]
     public void Setup() => _rangeService = new();
 
-    [TestCase("-10.5", "10.5", "-(10.5, 10.5), -(10.0, 10.4), +-(0, 9), (10.0, 10.4), (10.5, 10.5)")] //Unoptimized, should be able to account for same integer and decimal ranges with opposite signs
+    [TestCase("-10.5", "10.5", "-(10.5, 10.5), -(10.0, 10.4), +-(0.0, 9.0), (10.0, 10.4), (10.5, 10.5)")] //Unoptimized, should be able to account for same integer and decimal ranges with opposite signs
     [TestCase("-.5", ".5", "-(0.5, 0.5), -(0.0, 0.4), (0.0, 0.4), (0.5, 0.5)")] //Unoptimized, there are duplicate ranges with different signs
     [TestCase("-.5", "-.2", "-(0.2, 0.4), -(0.5, 0.5)")]
     [TestCase(".2", ".5", "(0.2, 0.4), (0.5, 0.5)")]
