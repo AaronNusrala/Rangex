@@ -1,29 +1,14 @@
 using RegexGenerator.Interfaces;
 using RegexGenerator.Models;
-using RegexGenerator.Models.Input;
+using RegexGenerator.Services.RangeValidators;
 
 namespace RegexGenerator.Services.InputParsers;
 
-internal class DecimalInputParser(InputRangeValidator validator) : IInputParser
+internal class SignedDecimalInputParser(IRangeValidator<SignedDecimal> validator) : InputParser<SignedDecimal>(validator)
 {
-    public DecimalInputParser() : this(new InputRangeValidator()) { }
+    public SignedDecimalInputParser() : this(new DecimalRangeValidator()) { }
     
-    public InputRange ParseInput(string min, string max)
-    {
-        var minRegexNumber = ParseString(min);
-        var maxRegexNumber = ParseString(max);
-        
-        var range = new InputRange
-        {
-            Min = minRegexNumber,
-            Max = maxRegexNumber
-        };
-        
-        validator.ValidateInputRange(range);
-        return range;
-    }
-
-    private static InputNumber ParseString(string input)
+    protected override SignedDecimal ParseInput(string input)
     {
         if (string.IsNullOrWhiteSpace(input))
         {
@@ -55,19 +40,19 @@ internal class DecimalInputParser(InputRangeValidator validator) : IInputParser
             
         var regexDecimal = parts.Length > 1
             ? FractionalFromString(parts[1])
-            : UnsignedRegexFractional.Zero;
+            : UnsignedFractional.Zero;
 
         if (regexInteger == 0 && regexDecimal.Value == 0)
         {
             isNegative = false; //Not going to deal with negative zero.
         }
 
-        return new InputNumber(isNegative, regexInteger, regexDecimal);
+        return new SignedDecimal(regexInteger, regexDecimal, isNegative);
     }
 
     private static Exception InvalidNumber() => new("Input is not a valid number");
     
-    private static UnsignedRegexFractional FractionalFromString(string input)
+    private static UnsignedFractional FractionalFromString(string input)
     {
         var decimalLeadingZeros = input
             .TakeWhile((c, i) => i < input.Length - 1 && c == '0')
@@ -79,6 +64,6 @@ internal class DecimalInputParser(InputRangeValidator validator) : IInputParser
         
         var valueString = string.Join("", valueCharacters);
         var decimalValue = valueCharacters.Count != 0 ? int.Parse(valueString) : 0;
-        return new UnsignedRegexFractional(decimalLeadingZeros, decimalValue);
+        return new UnsignedFractional(decimalLeadingZeros, decimalValue);
     }
 }

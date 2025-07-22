@@ -1,27 +1,22 @@
-﻿using RegexGenerator.Models;
-using RegexGenerator.Utilities;
+﻿using RegexGenerator.Interfaces;
+using RegexGenerator.Models;
 
 namespace RegexGenerator.Services.RangeCalculators;
 
-internal interface IIntegerRangeCalculator
-{
-    IEnumerable<IntegerRegexRange> CalculateRanges(int min, int max);
-}
-
-internal class UnsignedIntegerRangeCalculator : IIntegerRangeCalculator
+internal class UnsignedIntegerRangeCalculator : IRangeCalculator<int, int>
 {
     /// <summary>
     /// Returns regex-able number ranges between (inclusive) the min and max positive integer parameters in ascending order.
     /// </summary>
-    public IEnumerable<IntegerRegexRange> CalculateRanges(int min, int max)
+    public IEnumerable<Range<int>> CalculateRegexRanges(IInteger min, IInteger max)
     {
         if (min < 0 || max < 0)
         {
             throw new ArgumentException("min and max must be zero or greater");
         }
         
-        var lowerRanges = new List<IntegerRegexRange>();
-        var upperRanges = new List<IntegerRegexRange>();
+        var lowerRanges = new List<Range<int>>();
+        var upperRanges = new List<Range<int>>();
         
         for (var i = 0; min <= max; i++)
         { 
@@ -39,11 +34,7 @@ internal class UnsignedIntegerRangeCalculator : IIntegerRangeCalculator
             
             if (bottomRange?.Max >= topRange?.Min)
             {
-                var intersection = new IntegerRegexRange
-                {
-                    Min = bottomRange.Min,
-                    Max = topRange.Max
-                };
+                var intersection = new Range<int>(bottomRange.Min, topRange.Max);
 
                 return lowerRanges
                     .Append(intersection)
@@ -66,21 +57,17 @@ internal class UnsignedIntegerRangeCalculator : IIntegerRangeCalculator
         return lowerRanges.Concat(upperRanges);
     }
 
-    private static IntegerRegexRange? SplitLower(int index, int min)
+    private static Range<int>? SplitLower(int index, IInteger min)
     {
         if (min != 0 && min.DigitAt(index) == 0)
         {
             return null;
         }
-        
-        return new IntegerRegexRange
-        {
-            Min = min,
-            Max = min.Nines(index)
-        };
+
+        return new Range<int>(min, min.Nines(index));
     }
 
-    private static IntegerRegexRange? SplitUpper(int index, int max)
+    private static Range<int>? SplitUpper(int index, int max)
     {
         var maxStr = max.ToString();
 
@@ -88,11 +75,7 @@ internal class UnsignedIntegerRangeCalculator : IIntegerRangeCalculator
         {
             return null;
         }
-        
-        return new IntegerRegexRange
-        {
-            Min = max.Zeros(index),
-            Max = max
-        };
+
+        return new Range<int>(max.Zeros(index), max);
     }
 }

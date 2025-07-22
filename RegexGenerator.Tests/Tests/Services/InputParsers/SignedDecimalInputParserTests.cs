@@ -6,12 +6,12 @@ using RegexGenerator.Services.InputParsers;
 namespace RegexGeneratorTests.Tests.Services;
 
 [TestFixture]
-public class DecimalInputParserTests
+public class SignedDecimalInputParserTests
 {
-    private DecimalInputParser? _parser;
+    private SignedDecimalInputParser? _parser;
     
     [SetUp]
-    public void Setup() => _parser = new DecimalInputParser();
+    public void Setup() => _parser = new SignedDecimalInputParser();
 
     [Test]
     public void Test()

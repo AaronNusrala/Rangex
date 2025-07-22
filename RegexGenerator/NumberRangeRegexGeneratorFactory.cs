@@ -1,12 +1,18 @@
 using RegexGenerator.Interfaces;
 using RegexGenerator.Models;
+using RegexGenerator.Services;
+using RegexGenerator.Services.InputParsers;
+using RegexGenerator.Services.RangeCalculators;
+using RegexGenerator.Services.RangeConverters;
+using RegexGenerator.Services.RangeValidators;
+using RegexGenerator.Services.RegexOptimizers;
 
 namespace RegexGenerator;
 
-public class NumberRangeRegexGeneratorFactory : INumberRangeRegexGeneratorFactory
+public class NumberRangeRegexGeneratorFactory
 {
-    public INumberRangeRegexGenerator Create(RegexGeneratorOptions? regexOptions = null)
+    public IRegexGenerator Create(RegexGeneratorOptions? regexOptions = null)
     {
-        var  
+        throw new NotImplementedException();
     }
 }

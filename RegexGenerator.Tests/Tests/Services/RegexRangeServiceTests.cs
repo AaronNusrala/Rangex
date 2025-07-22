@@ -23,7 +23,7 @@ public class RegexRangeServiceTests
     [TestCase("-1", "1", "+-(0, 1)")]
     public void Test(string min, string max, string expected)
     {
-        var parser = new DecimalInputParser();
+        var parser = new SignedDecimalInputParser();
         var input = parser.ParseInput(min, max); //cheating
         var ranges = _rangeService.GetRegexRanges(input);
         var actual = string.Join(", ", ranges);

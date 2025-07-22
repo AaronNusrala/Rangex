@@ -56,7 +56,7 @@ namespace RegexGeneratorTests.Tests.Services.RangeCalculators
             }
         }
         
-        private static UnsignedRegexFractional FromDecimal(decimal value)
+        private static UnsignedFractional FromDecimal(decimal value)
         {
             var doubleCharacters = value
                 .ToString()
@@ -70,16 +70,16 @@ namespace RegexGeneratorTests.Tests.Services.RangeCalculators
             var valueCharacters = doubleCharacters.Skip(decimalLeadingZeros);
             var valueString = string.Join("", valueCharacters);
             var decimalValue = int.Parse(valueString);
-            return new UnsignedRegexFractional(decimalLeadingZeros, decimalValue);
+            return new UnsignedFractional(decimalLeadingZeros, decimalValue);
         }
 
-        private static void AssertDecimalsAreEqual(UnsignedRegexFractional d1, UnsignedRegexFractional d2)
+        private static void AssertDecimalsAreEqual(UnsignedFractional d1, UnsignedFractional d2)
         {
             Assert.That(d1.LeadingZeros, Is.EqualTo(d2.LeadingZeros), $"Expected {d1}, got {d2}");
             Assert.That(d1.Value, Is.EqualTo(d2.Value), $"Expected {d1}, got {d2}");
         }
 
-        private static void ValidateRanges(UnsignedRegexFractional min, UnsignedRegexFractional max, List<RegexFractionalRange> ranges)
+        private static void ValidateRanges(UnsignedFractional min, UnsignedFractional max, List<RegexFractionalRange> ranges)
         {
             for (var i = 0; i < ranges.Count - 1; i++)
             {

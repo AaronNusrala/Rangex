@@ -6,7 +6,7 @@ namespace RegexGeneratorTests.Tests.Services
     [TestFixture]
     public class RegexBuilderTests
     {
-        private RegexBuilder _regexBuilder;
+        private RegexBuilder _regexBuilder = default;
 
         [SetUp]
         public void Setup()

@@ -1,8 +1,6 @@
-using RegexGenerator.Models.Input;
-
 namespace RegexGenerator.Interfaces;
 
-public interface IInputParser
+public interface IInputParser<TNumeric>
 {
-    InputRange ParseInput(string min, string max);
+    (TNumeric Min, TNumeric max) ParseInput(string min, string max);
 }

@@ -5,10 +5,11 @@ namespace RegexGenerator.Models;
 /// <summary>
 /// Represents a number [0, 1) in a way that can be used to calculate regex-able ranges.
 /// </summary>
-public sealed class UnsignedRegexFractional
+public sealed class UnsignedFractional
 {
     private int? _valueMagnitude;
-    public static UnsignedRegexFractional Zero => new(0, 0);
+    
+    public static UnsignedFractional Zero { get; } = new(0, 0);
 
     public int Value { get; }
 
@@ -16,7 +17,7 @@ public sealed class UnsignedRegexFractional
 
     public int ValueMagnitude => _valueMagnitude ??= Value.GetMagnitude();
 
-    public UnsignedRegexFractional(int leadingZeros, int value)
+    public UnsignedFractional(int leadingZeros, int value)
     {
         if (value < 0 || leadingZeros < 0)
         {

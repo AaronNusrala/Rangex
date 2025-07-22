@@ -1,12 +1,12 @@
 namespace RegexGenerator.Models;
 
-public class UnsignedRegexDecimal
+public class UnsignedDecimal
 {
     public int Integer { get; init; }
     
-    public UnsignedRegexFractional Fractional { get; init; }
+    public UnsignedFractional Fractional { get; init; }
 
-    public UnsignedRegexDecimal(int integer, UnsignedRegexFractional fractional)
+    public UnsignedDecimal(int integer, UnsignedFractional fractional)
     {
         if (integer < 0)
         {

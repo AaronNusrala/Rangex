@@ -1,6 +1,6 @@
 namespace RegexGenerator.Models.NumberSystems;
 
-public class Hexadecimal : NumberSystem
+public class HexadecimalCaseInsensitive : NumberSystem
 {
     
 }

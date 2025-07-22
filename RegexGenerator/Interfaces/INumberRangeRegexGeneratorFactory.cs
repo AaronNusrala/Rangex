@@ -4,5 +4,5 @@ namespace RegexGenerator.Interfaces;
 
 public interface INumberRangeRegexGeneratorFactory
 {
-    INumberRangeRegexGenerator Create(RegexGeneratorOptions? regexOptions = null);
+    IRegexGenerator Create(RegexGeneratorOptions? regexOptions = null);
 }

@@ -68,21 +68,4 @@ public static class MathUtilities
 
         return magnitude;
     }
-    
-    //Nines(1111, 2) -> 1999
-    public static int Nines(this int value, int index)
-    {
-        var t = 10.Pow(index + 1);
-        return value - value % t + t  - 1;
-    }
-
-    //Zeros(1111, 2) -> 1000
-    public static int Zeros(this int value, int index)
-    {
-        var t = 10.Pow(index + 1);
-        return value - value % t;
-    }
-    
-    //DigitAt(123, 1) -> 2
-    public static int DigitAt(this int value, int index) =>  value / 10.Pow(index) % 10;
 }

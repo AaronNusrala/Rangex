@@ -1,10 +1,13 @@
 ﻿using System.Text;
+using RegexGenerator.Models.Regex;
 
 namespace RegexGenerator.Services
 {
-    internal interface IRegexBuilder
+    public interface IRegexBuilder
     {
         IRegexBuilder MatchLiteralCharacter(char character);
+
+        IRegexBuilder MatchLiteral(IEnumerable<char> characters);
 
         IRegexBuilder BeginString();
 
@@ -18,6 +21,12 @@ namespace RegexGenerator.Services
 
         IRegexBuilder Or();
 
+        IRegexBuilder Repeat(int count);
+        
+        IRegexBuilder MatchIntegerRange(SignedRegexIntegerRange range);
+        
+        IRegexBuilder CharacterClassRange(RegexCharacterClass characterClass);
+
         string ToRegex();
     }
 
@@ -28,6 +37,16 @@ namespace RegexGenerator.Services
         public IRegexBuilder MatchLiteralCharacter(char character)
         {
             _stringBuilder.Append(character);
+            return this;
+        }
+
+        public IRegexBuilder MatchLiteral(IEnumerable<char> characters)
+        {
+            foreach(var character in characters)
+            {
+                _stringBuilder.Append(character);
+            }
+
             return this;
         }
 
@@ -61,12 +80,36 @@ namespace RegexGenerator.Services
             return this;
         }
 
+        public IRegexBuilder Repeat(int count)
+        {
+            _stringBuilder.Append('{').Append(count).Append('}');
+            return this;
+        }
+
+        //TODO get rid of this or make it handle signs.
+        public IRegexBuilder MatchIntegerRange(SignedRegexIntegerRange range)
+        {
+            MatchLiteral(range.Prefix);
+
+            foreach (var characterClass in range.Suffix)
+            {
+                CharacterClassRange(characterClass);
+            }
+
+            return this;
+        }
+
+        public IRegexBuilder CharacterClassRange(RegexCharacterClass characterClass)
+        {
+            return CharacterClassRange(characterClass.Start, characterClass.End);
+        }
+
         public IRegexBuilder Or()
         {
             _stringBuilder.Append('|');
             return this;
-        } 
-
+        }
+        
         public string ToRegex() => _stringBuilder.ToString();
     }
 }

@@ -1,48 +1,44 @@
-﻿using RegexGenerator.Models;
+﻿using RegexGenerator.Interfaces;
+using RegexGenerator.Models;
 using RegexGenerator.Utilities;
 
 namespace RegexGenerator.Services.RangeCalculators;
 
-internal interface IDecimalRangeCalculator
-{
-    IEnumerable<RegexFractionalRange> GetRanges(UnsignedRegexFractional min, UnsignedRegexFractional max, bool allowTrailingDecimals);
-}
-
 /// <summary>
 /// Calculates regex-able fractional ranges
 /// </summary>
-internal class UnsignedFractionalRangeCalculator : IDecimalRangeCalculator
+internal class UnsignedFractionalRangeCalculator(RegexGeneratorOptions options) : IRangeCalculator<UnsignedFractional, UnsignedFractional>
 {
-    public IEnumerable<RegexFractionalRange> GetRanges(UnsignedRegexFractional min, UnsignedRegexFractional max, bool allowTrailingDecimals)
+    public IEnumerable<Range<UnsignedFractional>> CalculateRegexRanges(UnsignedFractional min, UnsignedFractional max)
     {
         if (min.Value == 0)
         {
-            min = UnsignedRegexFractional.Zero;
+            min = UnsignedFractional.Zero;
         }
 
         if (max.Value == 0)
         {
-            max = UnsignedRegexFractional.Zero;
+            max = UnsignedFractional.Zero;
         }
         else
         {
             var newMaxValue = max.Value.TrimTrailingZeros();
-            max = new UnsignedRegexFractional(max.LeadingZeros, newMaxValue);
+            max = new UnsignedFractional(max.LeadingZeros, newMaxValue);
         }
             
         if (min.LeadingZeros == max.LeadingZeros && min.Value == max.Value)
         {
-            return [new RegexFractionalRange(min, max)];
+            return [new Range<UnsignedFractional>(min, max)];
         }
             
         min = NormalizeMagnitude(min, max);
-
-        var initialRange = allowTrailingDecimals
+        
+        var initialRange = options.AllowTrailingDecimals
             ? CompleteRangeFromMax(max)
-            : new RegexFractionalRange(max, max);
+            : new Range<UnsignedFractional>(min, max);
             
         var upperRanges = GetUpperRanges(initialRange.Min);
-        var lowerRanges = new List<RegexFractionalRange>();
+        var lowerRanges = new List<Range<UnsignedFractional>>();
         var lowerRange = CompleteRangeFromMin(min);
 
         while (true)
@@ -55,7 +51,7 @@ internal class UnsignedFractionalRangeCalculator : IDecimalRangeCalculator
 
             var intersection = GetIntersection(lowerRange, initialRange);
 
-            if (intersection != null && allowTrailingDecimals)
+            if (intersection != null && options.AllowTrailingDecimals)
             {
                 return lowerRanges.Append(intersection);
             }
@@ -90,28 +86,28 @@ internal class UnsignedFractionalRangeCalculator : IDecimalRangeCalculator
         }
     }
 
-    private static UnsignedRegexFractional NormalizeMagnitude(UnsignedRegexFractional min, UnsignedRegexFractional max)
+    private static UnsignedFractional NormalizeMagnitude(UnsignedFractional min, UnsignedFractional max)
     {
         var magnitudeDiff = max.ValueMagnitude - min.ValueMagnitude + (max.LeadingZeros - min.LeadingZeros);
             
         if (magnitudeDiff > 0)
         {
             var newMinValue = min.Value * 10.Pow(magnitudeDiff);
-            min = new UnsignedRegexFractional(min.LeadingZeros, newMinValue);
+            min = new UnsignedFractional(min.LeadingZeros, newMinValue);
         }
              
         if(magnitudeDiff < 0)
         {
             var newMinValue = min.Value.TrimTrailingZeros(-magnitudeDiff);
-            min = new UnsignedRegexFractional(min.LeadingZeros, newMinValue);
+            min = new UnsignedFractional(min.LeadingZeros, newMinValue);
         }
 
         return min;
     }
 
-    private static List<RegexFractionalRange> GetUpperRanges(UnsignedRegexFractional max)
+    private static List<Range<UnsignedFractional>> GetUpperRanges(UnsignedFractional max)
     {
-        var upperRanges = new List<RegexFractionalRange>();
+        var upperRanges = new List<Range<UnsignedFractional>>();
             
         while (max.Value > 0)
         {
@@ -123,7 +119,7 @@ internal class UnsignedFractionalRangeCalculator : IDecimalRangeCalculator
         return upperRanges;
     }
         
-    private static RegexFractionalRange GetNextLowerRange(UnsignedRegexFractional previousMin)
+    private static Range<UnsignedFractional> GetNextLowerRange(UnsignedFractional previousMin)
     {
         if (previousMin.Value == 0)
         {
@@ -134,11 +130,11 @@ internal class UnsignedFractionalRangeCalculator : IDecimalRangeCalculator
         var nextMaxValue = previousMin.Value.TrimTrailingZeros(1);
         var nextMaxLeadingZeros = nextMaxValue.TrimTrailingZeros() == 1 ? previousMin.LeadingZeros + 1 : previousMin.LeadingZeros;
         nextMaxValue = nextMaxValue == 1 ? 9 : nextMaxValue - 1;
-        var nextMax = new UnsignedRegexFractional(nextMaxLeadingZeros, nextMaxValue);
+        var nextMax = new UnsignedFractional(nextMaxLeadingZeros, nextMaxValue);
         return CompleteRangeFromMax(nextMax);
     }
 
-    private static RegexFractionalRange GetNextHigherRange(UnsignedRegexFractional previousMax)
+    private static Range<UnsignedFractional> GetNextHigherRange(UnsignedFractional previousMax)
     {
         //TODO stop converting to string here.
         if (previousMax.Value.ToString().All(c => c == '9') && previousMax.LeadingZeros == 0)
@@ -154,22 +150,22 @@ internal class UnsignedFractionalRangeCalculator : IDecimalRangeCalculator
             : previousMax.LeadingZeros;
             
         nextMaxValue = nextMaxValue.TrimTrailingZeros(1);
-        var nextMin = new UnsignedRegexFractional(nextMaxLeadingZeros, nextMaxValue);
+        var nextMin = new UnsignedFractional(nextMaxLeadingZeros, nextMaxValue);
         return CompleteRangeFromMin(nextMin);
     }
 
-    private static RegexFractionalRange CompleteRangeFromMin(UnsignedRegexFractional min)
+    private static Range<UnsignedFractional> CompleteRangeFromMin(UnsignedFractional min)
     {
         var maxValue = min.Value - min.Value % 10 + 9;
-        var max = new UnsignedRegexFractional(min.LeadingZeros, maxValue);
-        return new RegexFractionalRange(min, max);
+        var max = new UnsignedFractional(min.LeadingZeros, maxValue);
+        return new Range<UnsignedFractional>(min, max);
     }
 
-    private static RegexFractionalRange CompleteRangeFromMax(UnsignedRegexFractional max)
+    private static Range<UnsignedFractional> CompleteRangeFromMax(UnsignedFractional max)
     {
         var newMinValue = max.Value - max.Value % 10;
-        var nextMin = new UnsignedRegexFractional(max.LeadingZeros, newMinValue);
-        return new RegexFractionalRange(nextMin, max);
+        var nextMin = new UnsignedFractional(max.LeadingZeros, newMinValue);
+        return new Range<UnsignedFractional>(nextMin, max);
     }
 
     /// <summary>
@@ -179,18 +175,18 @@ internal class UnsignedFractionalRangeCalculator : IDecimalRangeCalculator
     /// 2. The values must always have the same number of digits.
     /// </summary>
     /// <returns>A DecimalRegexRange that represents the intersection of the two range parameters</returns>
-    private static RegexFractionalRange? GetIntersection(RegexFractionalRange r1, RegexFractionalRange r2)
+    private static Range<UnsignedFractional>? GetIntersection(Range<UnsignedFractional> r1, Range<UnsignedFractional> r2)
     {
         if (r1.Min.LeadingZeros == r2.Min.LeadingZeros && r1.Min.Value <= r2.Max.Value && r2.Min.Value <= r1.Max.Value)
         {
-            return new RegexFractionalRange(r1.Min, r2.Max);
+            return new Range<UnsignedFractional>(r1.Min, r2.Max);
         }
             
         if (r1.Min.Value == 0 && r2.Min.Value == 0)
         {
             return r1.Min.LeadingZeros > r2.Min.LeadingZeros 
-                ? new RegexFractionalRange(r1.Min, r1.Max)
-                : new RegexFractionalRange(r2.Min, r2.Max);
+                ? new Range<UnsignedFractional>(r1.Min, r1.Max)
+                : new Range<UnsignedFractional>(r2.Min, r2.Max);
         }
 
         return null;

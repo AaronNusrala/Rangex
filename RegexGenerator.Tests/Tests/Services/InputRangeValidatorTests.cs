@@ -37,7 +37,7 @@ public class InputRangeValidatorTests
     [TestCase("-1", "1")]
     public void Does_Not_Throw_For_Valid_Ranges(string min, string max)
     {
-        var parser = new DecimalInputParser();
+        var parser = new SignedDecimalInputParser();
         var input = parser.ParseInput(min, max);
         Assert.DoesNotThrow(() => _validator.ValidateInputRange(input));
     }
@@ -58,7 +58,7 @@ public class InputRangeValidatorTests
     [TestCase("1", "-2")]
     public void Throws_For_Invalid_Ranges(string min, string max)
     {
-        var parser = new DecimalInputParser();
+        var parser = new SignedDecimalInputParser();
         var input = parser.ParseInput(min, max);
         var ex = Assert.Throws<Exception>(() => _validator.ValidateInputRange(input));
     }
