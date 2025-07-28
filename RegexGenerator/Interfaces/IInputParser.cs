@@ -1,6 +1,6 @@
 namespace RegexGenerator.Interfaces;
 
-public interface IInputParser<TNumeric>
-{
-    (TNumeric Min, TNumeric max) ParseInput(string min, string max);
+internal interface IInputParser
+{ 
+    IParseResult ParseInput<TNumberSystem>(string min, string max) where TNumberSystem : INumberSystem;
 }

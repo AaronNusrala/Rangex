@@ -1,12 +1,47 @@
+using System.Numerics;
+using System.Text;
+using RegexGenerator.Interfaces;
+
 namespace RegexGenerator.Utilities;
 
-public static class MathUtilities
+internal static class MathUtilities
 {
-    /// <summary>
-    /// Good enough integer exponents. Positive exponents only.
-    /// </summary>
-    /// <returns>The value raised to the exponent</returns>
-    public static int Pow(this int value, int exponent)
+    public static TInt Nines<TInt, TNumberSystem>(this TInt value, int index) where TInt : INumber<TInt> where TNumberSystem : INumberSystem
+    {
+        var @base = TNumberSystem.Radix - 1;
+        var iPow = Pow(@base, index + 1);
+        var iPowInt = TInt.CreateChecked(iPow);
+        return value - value % iPowInt + iPowInt - TInt.One;
+    }
+    
+    public static TInt Zeros<TInt, TNumberSystem>(this TInt value, int index) where TInt : INumber<TInt> where TNumberSystem : INumberSystem
+    {
+        var radPow = Pow(TNumberSystem.Radix, index + 1);
+        var radPowInt = TInt.CreateChecked(radPow);
+        return value - value % radPowInt;
+    }
+    
+    public static int GetMagnitude<TInt, TNumberSystem>(this TInt value) where TInt : INumber<TInt> where TNumberSystem : INumberSystem
+    {
+        var magnitude = 0;
+        var radPow = TInt.CreateChecked(TNumberSystem.Radix);
+
+        for (var i = TInt.One; value > i; i *= radPow)
+        {
+            magnitude++;
+        }
+
+        return magnitude;
+    }
+    
+    public static TInt DigitAt<TInt, TNumberSystem>(this TInt value, int index) where TInt : INumber<TInt> where TNumberSystem : INumberSystem
+    {
+        var tRad = TInt.CreateChecked(TNumberSystem.Radix);
+        var powIndex = Pow(tRad, index);
+        return value / TInt.CreateChecked(powIndex) % tRad;
+    }
+
+    private static TInt Pow<TInt>(TInt value, int exponent) where TInt : INumber<TInt>
     {
         if (exponent < 0)
         {
@@ -15,7 +50,7 @@ public static class MathUtilities
         
         if (exponent == 0)
         {
-            return 1;
+            return TInt.One;
         }
 
         if (exponent == 1)
@@ -23,49 +58,23 @@ public static class MathUtilities
             return value;
         }
 
-        if (value == 0)
+        if (value == TInt.Zero)
         {
-            return 0;
+            return TInt.Zero;
         }
 
-        if (value == 1)
+        if (value == TInt.One)
         {
-            return 1;
+            return TInt.One;
         }
 
-        var result = value;
+        TInt result = value;
         
-        for (var i = 0; i < exponent - 1; i++)
+        for (var i = TInt.Zero; i < TInt.CreateChecked(exponent - 1); i++)
         {
             result *= value;
         }
 
         return result;
-    }
-    
-    /// <summary>
-    /// If zerosToTrim is null then all trailing zeros are trimmed. ex 12300 => 123
-    /// </summary>
-    public static int TrimTrailingZeros(this int value, int? zerosToTrim = null)
-    {
-        for (var i = 0; (i < zerosToTrim || zerosToTrim == null) && value > 0 && value % 10 == 0; i++)
-        {
-            value /= 10;
-        }
-
-        return value;
-    }
-
-    //123 -> 3
-    public static int GetMagnitude(this int value)
-    {
-        var magnitude = 0;
-
-        for (var i = 1; i <= value; i *= 10)
-        {
-            magnitude++;
-        }
-
-        return magnitude;
     }
 }

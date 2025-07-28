@@ -1,4 +1,5 @@
 using RegexGenerator.Enumerations;
+using RegexGenerator.Interfaces;
 
 namespace RegexGenerator.Models;
 

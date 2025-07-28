@@ -8,6 +8,7 @@
 <ItemGroup>
 	<InternalsVisibleTo Include="RegexGenerator.Tests" />
     <InternalsVisibleTo Include="RegexGenerator.DependencyInjection" />
+    <InternalsVisibleTo Include="Demo" />
 </ItemGroup>
 
 </Project>

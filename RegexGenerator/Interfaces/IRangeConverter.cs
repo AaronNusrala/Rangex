@@ -1,8 +1,8 @@
-using RegexGenerator.Models;
+using RegexGenerator.Models.Numeric;
 
 namespace RegexGenerator.Interfaces;
 
-public interface IRangeConverter<TNumeric, out TRegexRange>
+public interface IRangeConverter<TInt, out TRegexRange>
 {
-    TRegexRange ConvertToRegexRanges(Range<TNumeric> range);
+    TRegexRange ConvertToRegexRanges<TNumberSystem>(Range<TInt> range) where TNumberSystem : INumberSystem;
 }

@@ -1,45 +1,24 @@
+using System.Numerics;
+using System.Text;
+using RegexGenerator.Interfaces;
+
 namespace RegexGenerator.Models.NumberSystems;
 
-public abstract class NumberSystem
+internal static class NumberSystem
 {
-    protected NumberSystem(char[,] characters, int radix)
+    public static string ToNumberSystemString<TInt, TNumberSystem>(TInt value) where TInt : INumber<TInt> where TNumberSystem : INumberSystem
     {
-        Characters = characters;
-        Radix = radix;
-    }
-
-    protected char[,] Characters { get; }
-    
-    protected int Radix { get; }
-
-    public int Parse(string input)
-    {
-        if (string.IsNullOrEmpty(input))
-        {
-            throw new ArgumentException("Input cannot be null or empty.", nameof(input));
-        }
-
-        var result = 0;
+        var stringBuilder = new StringBuilder();
+        var tRad = TInt.CreateChecked(TNumberSystem.Radix);
         
-        for (var i = 0; i < input.Length; i++)
+        while (value > TInt.Zero)
         {
-            var c = input[i];
-            for (var row = 0; row < Characters.GetLength(0); row++)
-            {
-                for (int col = 0; col < Characters.GetLength(1); col++)
-                {
-                    if (Characters[row, col] == c)
-                    {
-                        digitValue = row * Characters.GetLength(1) + col;
-                        break;
-                    }
-                }
-                if (digitValue != -1) break;
-            }
-            if (digitValue == -1)
-                throw new ArgumentException($"Invalid character '{c}' in input.");
-            result = result * Radix + digitValue;
+            var digitValue = int.CreateChecked(value % tRad);
+            var digit = TNumberSystem.Lookup(digitValue);
+            stringBuilder.Insert(0, digit);
+            value /= tRad;
         }
-        return result;
+        
+        return stringBuilder.ToString();
     }
 }

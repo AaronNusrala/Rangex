@@ -1,14 +1,14 @@
+using System.Numerics;
 using RegexGenerator.Interfaces;
 
 namespace RegexGenerator.Services.RangeValidators;
 
-public class IntegerRangeValidator : IRangeValidator<int>
+internal class IntegerRangeValidator : IRangeValidator
 {
-    public void ValidateRange(int min, int max)
+    public (bool Result, string Message) ValidateRange<TInt>(TInt min, TInt max) where TInt : IComparisonOperators<TInt, TInt, bool>?
     {
-        if (min > max)
-        {
-            throw new ArgumentException("Min must be less than or equal to Max");
-        }
+        return min > max 
+            ? (false, "Min must be less than or equal to Max.") 
+            : (true, "Valid range.");
     }
 }

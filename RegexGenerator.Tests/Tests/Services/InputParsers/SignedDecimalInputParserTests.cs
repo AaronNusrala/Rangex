@@ -1,9 +1,7 @@
 using System;
 using NUnit.Framework;
-using RegexGenerator.Services;
-using RegexGenerator.Services.InputParsers;
 
-namespace RegexGeneratorTests.Tests.Services;
+namespace RegexGeneratorTests.Tests.Services.InputParsers;
 
 [TestFixture]
 public class SignedDecimalInputParserTests

@@ -1,6 +1,8 @@
+using System.Numerics;
+
 namespace RegexGenerator.Interfaces;
 
-public interface IRangeValidator<in TNumeric>
+public interface IRangeValidator
 {
-    void ValidateRange(TNumeric min, TNumeric max);
+    (bool Result, string Message) ValidateRange<TInt>(TInt min, TInt max) where TInt : IComparisonOperators<TInt, TInt, bool>?;
 }

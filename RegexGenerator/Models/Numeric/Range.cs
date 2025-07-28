@@ -1,21 +1,14 @@
 using RegexGenerator.Enumerations;
 
-namespace RegexGenerator.Models;
+namespace RegexGenerator.Models.Numeric;
 
-public class Range<TNumeric>
+public class Range<TNumeric>(TNumeric min, TNumeric max, RangeSign? sign = null)
 {
-    public RangeSign? Sign { get; set; }
-    
-    public TNumeric Min { get; init; }
-    
-    public TNumeric Max { get; init; }
+    public RangeSign? Sign { get; set; } = sign;
 
-    public Range(TNumeric min, TNumeric max, RangeSign? sign = null)
-    {
-        Sign = sign;
-        Min = min;
-        Max = max;
-    }
+    public TNumeric Min { get; init; } = min;
+
+    public TNumeric Max { get; init; } = max;
 
     public void Deconstruct(out TNumeric min, out TNumeric max) => (min, max) = (Min, Max);
 
@@ -26,7 +19,7 @@ public class Range<TNumeric>
             RangeSign.Positive => "",
             RangeSign.Negative => "-",
             RangeSign.PositiveOrNegative => "+-",
-            _ => throw new ArgumentOutOfRangeException()
+            _ => "?" //Don't want ToString to throw, but you definitely did something weird if you see this.
         };
 
         return $"{signString}({Min}, {Max})";

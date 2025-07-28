@@ -1,16 +1,17 @@
+using System.Numerics;
 using RegexGenerator.Enumerations;
 using RegexGenerator.Interfaces;
-using RegexGenerator.Models;
+using RegexGenerator.Models.Numeric;
 using RegexGenerator.Models.Regex;
 
 namespace RegexGenerator.Services.RangeConverters;
 
-internal class SignedIntegerRangeConverter : IRangeConverter<int, SignedRegexIntegerRange>
+internal class SignedIntegerRangeConverter<TInt> : IRangeConverter<TInt, SignedRegexIntegerRange> where TInt : INumber<TInt>
 {
-    public SignedRegexIntegerRange ConvertToRegexRanges(Range<int> range)
+    public SignedRegexIntegerRange ConvertToRegexRanges<TNumberSystem>(Range<TInt> range) where TNumberSystem : INumberSystem
     {
-        var minString = range.Min.ToString();
-        var maxString = range.Max.ToString();
+        var minString = TNumberSystem.ToNumberSystemString(range.Min);
+        var maxString = TNumberSystem.ToNumberSystemString(range.Max);
 
         var prefix = new List<char>();
         var suffix = new List<RegexCharacterClass>();

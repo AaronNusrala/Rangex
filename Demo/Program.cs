@@ -1,15 +1,15 @@
-﻿using RegexGenerator;
-using RegexGenerator.Enumerations;
-using RegexGenerator.Models;
+﻿using RegexGenerator.Models.NumberSystems;
+using RegexGenerator.Services;
+using RegexGenerator.Services.InputParsers;
 
-var factory = new NumberRangeRegexGeneratorFactory();
+var stepFactory = new PipelineStepFactory();
+var parser = new IntegerParser(stepFactory);
 
-var options = new RegexGeneratorOptions
-{
-    InputMode = GenerationMode.Integer,
-    OutputMode = GenerationMode.Integer
-};
-
-var generator = factory.Create();
-var regex = generator.GenerateRegex("81", "1031");
+var regex = parser.ParseInput<DecimalNumbers>("1", "999")
+    .ValidateInput()
+    .CalculateRegexRanges()
+    .ConvertRanges()
+    .OptimizeRanges()
+    .Regex;
+    
 Console.WriteLine(regex);
