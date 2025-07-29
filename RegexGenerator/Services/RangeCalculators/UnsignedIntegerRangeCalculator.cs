@@ -44,10 +44,10 @@ internal class UnsignedIntegerRangeCalculator<TInt> : IRangeCalculator<TInt, TIn
                     .Concat(upperRanges);
             }
 
-            if (bottomRange != null && topRange != null)
+            if (bottomRange != null)
             {
                 min = bottomRange.Max + TInt.One;
-                lowerRanges.Add(new Range<TInt>(bottomRange.Min, topRange.Max));
+                lowerRanges.Add(bottomRange);
             }
 
             if (topRange != null)
@@ -60,7 +60,7 @@ internal class UnsignedIntegerRangeCalculator<TInt> : IRangeCalculator<TInt, TIn
         return lowerRanges.Concat(upperRanges);
     }
 
-    private Range<TInt>? SplitLower<TNumberSystem>(int index, TInt min) where TNumberSystem : INumberSystem
+    private static Range<TInt>? SplitLower<TNumberSystem>(int index, TInt min) where TNumberSystem : INumberSystem
     {
         if (min != TInt.Zero && min.DigitAt<TInt, TNumberSystem>(index) == TInt.Zero)
         {
@@ -71,7 +71,7 @@ internal class UnsignedIntegerRangeCalculator<TInt> : IRangeCalculator<TInt, TIn
         return new (min, max);
     }
 
-    private Range<TInt>? SplitUpper<TNumberSystem>(int index, TInt max) where TNumberSystem : INumberSystem
+    private static Range<TInt>? SplitUpper<TNumberSystem>(int index, TInt max) where TNumberSystem : INumberSystem
     {
         //TODO avoid string conversion
         var maxStr = max.ToString();

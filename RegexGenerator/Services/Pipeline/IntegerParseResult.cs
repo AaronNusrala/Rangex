@@ -4,7 +4,7 @@ using RegexGenerator.Interfaces.Pipeline;
 
 namespace RegexGenerator.Services.Pipeline;
 
-internal class IntegerParseResult<TInt, TNumberSystem>(IPipelineStepFactory stepFactory, IRangeValidator rangeValidator, TInt min, TInt max) 
+internal class IntegerParseResult<TInt, TNumberSystem>(IPipelineStepFactory stepFactory, IRangeValidator<TInt> rangeValidator, TInt min, TInt max) 
     : IParseResult where TInt : INumber<TInt> where TNumberSystem : INumberSystem
 {
     public bool Successful => true;

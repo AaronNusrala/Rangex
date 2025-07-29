@@ -1,27 +1,30 @@
 using System.Numerics;
-using System.Text;
 using RegexGenerator.Interfaces;
 
 namespace RegexGenerator.Utilities;
 
 internal static class MathUtilities
 {
-    public static TInt Nines<TInt, TNumberSystem>(this TInt value, int index) where TInt : INumber<TInt> where TNumberSystem : INumberSystem
+    public static TInt Nines<TInt, TNumberSystem>(this TInt value, int index) 
+        where TInt : INumber<TInt> 
+        where TNumberSystem : INumberSystem
     {
-        var @base = TNumberSystem.Radix - 1;
-        var iPow = Pow(@base, index + 1);
-        var iPowInt = TInt.CreateChecked(iPow);
-        return value - value % iPowInt + iPowInt - TInt.One;
+        var iRad = TInt.CreateChecked(TNumberSystem.Radix);
+        var radPow = iRad.Pow(index + 1);
+        return value - value % radPow + radPow - TInt.One;
     }
     
-    public static TInt Zeros<TInt, TNumberSystem>(this TInt value, int index) where TInt : INumber<TInt> where TNumberSystem : INumberSystem
+    public static TInt Zeros<TInt, TNumberSystem>(this TInt value, int index) 
+        where TInt : INumber<TInt> 
+        where TNumberSystem : INumberSystem
     {
-        var radPow = Pow(TNumberSystem.Radix, index + 1);
-        var radPowInt = TInt.CreateChecked(radPow);
-        return value - value % radPowInt;
+        var iRad = TInt.CreateChecked(TNumberSystem.Radix);
+        return value - value % iRad.Pow(index + 1);
     }
     
-    public static int GetMagnitude<TInt, TNumberSystem>(this TInt value) where TInt : INumber<TInt> where TNumberSystem : INumberSystem
+    public static int GetMagnitude<TInt, TNumberSystem>(this TInt value) 
+        where TInt : INumber<TInt> 
+        where TNumberSystem : INumberSystem
     {
         var magnitude = 0;
         var radPow = TInt.CreateChecked(TNumberSystem.Radix);
@@ -34,14 +37,32 @@ internal static class MathUtilities
         return magnitude;
     }
     
-    public static TInt DigitAt<TInt, TNumberSystem>(this TInt value, int index) where TInt : INumber<TInt> where TNumberSystem : INumberSystem
+    public static TInt DigitAt<TInt, TNumberSystem>(this TInt value, int index) 
+        where TInt : INumber<TInt> where TNumberSystem : INumberSystem
     {
         var tRad = TInt.CreateChecked(TNumberSystem.Radix);
-        var powIndex = Pow(tRad, index);
+        var powIndex = tRad.Pow(index);
         return value / TInt.CreateChecked(powIndex) % tRad;
     }
+    
+    //12300 => 123
+    public static TInt TrimTrailingZeros<TInt, TNumberSystem>(this TInt value, int? zerosToTrim = null)
+        where TInt : INumber<TInt> 
+        where TNumberSystem : INumberSystem
+    {
+        var tRad = TInt.CreateChecked(TNumberSystem.Radix);
+        
+        for (var i = 0; (i < zerosToTrim || zerosToTrim == null) && value > TInt.Zero && value % tRad == TInt.Zero; i++)
+        {
+            value /= tRad;
+        }
 
-    private static TInt Pow<TInt>(TInt value, int exponent) where TInt : INumber<TInt>
+        return value;
+    }
+
+
+    public static TInt Pow<TInt>(this TInt value, int exponent) 
+        where TInt : INumber<TInt>
     {
         if (exponent < 0)
         {
@@ -68,7 +89,7 @@ internal static class MathUtilities
             return TInt.One;
         }
 
-        TInt result = value;
+        var result = value;
         
         for (var i = TInt.Zero; i < TInt.CreateChecked(exponent - 1); i++)
         {

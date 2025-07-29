@@ -1,5 +1,6 @@
 using System.Numerics;
 using RegexGenerator.Interfaces;
+using RegexGenerator.Models.NumberSystems;
 using RegexGenerator.Services.Pipeline;
 
 namespace RegexGenerator.Services.InputParsers;
@@ -44,10 +45,15 @@ internal class IntegerParser(IPipelineStepFactory stepFactory) : IInputParser
     
     private static BigInteger ParseInt<TNumberSystem>(string value) where TNumberSystem : INumberSystem
     {
+        if (typeof(TNumberSystem) == typeof(DecimalNumbers))
+        {
+            return BigInteger.Parse(value);
+        }
+        
         var isNegative = value.StartsWith('-');
 
         var numericValue = BigInteger.Zero;
-
+        
         for (var i = isNegative ? 1 : 0; i < value.Length; i++)
         {
             var digitValue = TNumberSystem.Lookup(value[i]);

@@ -9,6 +9,7 @@
 	<InternalsVisibleTo Include="RegexGenerator.Tests" />
     <InternalsVisibleTo Include="RegexGenerator.DependencyInjection" />
     <InternalsVisibleTo Include="Demo" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2"/>
 </ItemGroup>
 
 </Project>

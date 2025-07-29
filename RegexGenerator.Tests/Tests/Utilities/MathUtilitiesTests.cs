@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using RegexGenerator.Models.NumberSystems;
 using RegexGenerator.Utilities;
 
 namespace RegexGeneratorTests.Tests.Utilities;
@@ -24,7 +25,27 @@ public class MathUtilitiesTests
   [TestCase(2222, 3, 0)]
   public void TestZeros(int input, int index, int expected)
   {
-    var result = input.Zeros(index);
+    var result = input.Zeros<int, DecimalNumbers>(index);
+    Assert.That(result, Is.EqualTo(expected));
+  }
+  
+  [TestCase(2222, 0, 2229)]
+  [TestCase(2222, 1, 2299)]
+  [TestCase(2222, 2, 2999)]
+  [TestCase(2222, 3, 9999)]
+  public void TestNines(int input, int index, int expected)
+  {
+    var result = input.Nines<int, DecimalNumbers>(index);
+    Assert.That(result, Is.EqualTo(expected));
+  }
+  
+  [TestCase(1234, 0, 4)]
+  [TestCase(1234, 1, 3)]
+  [TestCase(1234, 2, 2)]
+  [TestCase(1234, 3, 1)]
+  public void TestDigitAt(int input, int index, int expected)
+  {
+    var result = input.DigitAt<int, DecimalNumbers>(index);
     Assert.That(result, Is.EqualTo(expected));
   }
 }

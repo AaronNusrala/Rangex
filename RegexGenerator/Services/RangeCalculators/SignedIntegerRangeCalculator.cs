@@ -5,7 +5,7 @@ using RegexGenerator.Models.Numeric;
 
 namespace RegexGenerator.Services.RangeCalculators;
 
-internal class SignedIntegerRangeCalculator<TInt>(UnsignedIntegerRangeCalculator<TInt> integerRangeCalculator)
+internal class SignedIntegerRangeCalculator<TInt>(IRangeCalculator<TInt, TInt> unsignedRangeCalculator)
     : IRangeCalculator<TInt, TInt> where TInt : INumber<TInt>
 {
     /* TODO if we knew which decimal was greater regardless of the integer, we could apply the same optimizations to decimals that
@@ -53,7 +53,7 @@ internal class SignedIntegerRangeCalculator<TInt>(UnsignedIntegerRangeCalculator
     private IEnumerable<Range<TInt>> GetIntegerRegexRanges<TNumberSystem>(TInt min, TInt max, RangeSign rangeSign)
         where TNumberSystem : INumberSystem
     {
-        foreach (var range in integerRangeCalculator.CalculateRegexRanges<TNumberSystem>(min, max))
+        foreach (var range in unsignedRangeCalculator.CalculateRegexRanges<TNumberSystem>(min, max))
         {
             range.Sign = rangeSign;
             yield return range;

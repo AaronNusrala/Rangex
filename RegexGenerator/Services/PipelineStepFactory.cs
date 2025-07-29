@@ -1,7 +1,7 @@
 using System.Numerics;
 using RegexGenerator.Interfaces;
 using RegexGenerator.Interfaces.Pipeline;
-using RegexGenerator.Models.NumberSystems;
+using RegexGenerator.Models;
 using RegexGenerator.Models.Numeric;
 using RegexGenerator.Models.Regex;
 using RegexGenerator.Services.Pipeline;
@@ -17,8 +17,16 @@ internal class PipelineStepFactory : IPipelineStepFactory
     public IParseResult CreateParseResult<TInt, TNumberSystem>(TInt min, TInt max) 
         where TInt : INumber<TInt> where TNumberSystem : INumberSystem
     {
-        var rangeValidator = new IntegerRangeValidator();
+        var rangeValidator = new IntegerRangeValidator<TInt>();
         return new IntegerParseResult<TInt, TNumberSystem>(this, rangeValidator, min, max);
+    }
+    
+    public IParseResult CreateParseResult<TInt, TFractional, TNumberSystem>(SignedDecimal<TInt, TFractional> min, SignedDecimal<TInt, TFractional> max) 
+        where TInt : INumber<TInt> 
+        where TFractional : INumber<TFractional>
+        where TNumberSystem : INumberSystem
+    {
+        return null;
     }
     
     public IValidationResult CreateValidationResult<TInt, TNumberSystem>(TInt min, TInt max) 
@@ -38,7 +46,7 @@ internal class PipelineStepFactory : IPipelineStepFactory
 
     public IRangeConversionResult CreateRangeConversionResult<TNumberSystem>(IEnumerable<SignedRegexIntegerRange> ranges) where TNumberSystem : INumberSystem
     {
-        var rangeOptimizer = new SimpleUnsignedIntegerRegexOptimizer();
+        var rangeOptimizer = new SimpleUnsignedIntegerRegexOptimizer(); //TODO handle signed ranges
         return new RangeConversionResult<SignedRegexIntegerRange, TNumberSystem>(this, rangeOptimizer, ranges);
     }
     

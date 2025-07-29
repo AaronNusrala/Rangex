@@ -5,7 +5,8 @@ using RegexGenerator.Services.InputParsers;
 var stepFactory = new PipelineStepFactory();
 var parser = new IntegerParser(stepFactory);
 
-var regex = parser.ParseInput<DecimalNumbers>("1", "999")
+var regex = parser
+    .ParseInput<DecimalNumbers>("1", "100")
     .ValidateInput()
     .CalculateRegexRanges()
     .ConvertRanges()
